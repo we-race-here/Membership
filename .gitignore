@@ -75,6 +75,15 @@ target/
 # pyenv
 .python-version
 
+# pycharm config
+.idea/
+
+# django
+www/
+*/*/settings/external_config*.py
+*/*/settings/local.py
+race_membership/media/
+
 # celery beat schedule file
 celerybeat-schedule
 

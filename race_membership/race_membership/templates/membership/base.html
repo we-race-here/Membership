@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}We Race Here - Membership{% endblock %}
+
+{% block breadcrumb %}
+  <nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item">
+        <a href="{% url 'membership:index' %}"><i class="fas fa-home"></i> Home</a>
+      </li>
+      {% block breadcrumb_items %}
+      {% endblock %}
+    </ol>
+  </nav>
+{% endblock %}
+

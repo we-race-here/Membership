@@ -1,0 +1,43 @@
+{% extends "membership/base.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+
+{% block breadcrumb_items %}
+  <li class="breadcrumb-item active" aria-current="page">Profile</li>
+{% endblock %}
+
+{% block content %}
+
+  <div class="card">
+    <div class="card-header">
+      <h4 class="mb-0">Edit Your Profile</h4>
+    </div>
+    <div class="card-body">
+      <form enctype="multipart/form-data" method="post">
+        {% csrf_token %}
+        <div class="form-group row">
+          <label class="col-md-2 col-form-label" for="id_username">Username</label>
+          <div class="col-md-10">
+            <input class="form-control" id="id_username" maxlength="30" name="username" type="text"
+                   value="{{ object.username }}" readonly>
+          </div>
+        </div>
+
+        {% bootstrap_form form layout='horizontal' form_group_class='form-group row' horizontal_label_class='col-md-2' field_class='col-md-10' %}
+        <hr>
+        <div class="form-group row">
+          <label class="col-md-2 col-form-label form-control-label"></label>
+          <div class="col-md-10">
+            <button type="submit" class="btn btn-primary" name="submit">Save</button>
+            <a class="btn btn-secondary" href="{% url 'membership:index' %}">Cancel</a>
+            <div class="float-right">
+              <a class="btn btn-warning" href="{% url 'membership:change-password' %}"><span class="fa fa-key"></span>
+                Change Password</a>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+{% endblock %}
