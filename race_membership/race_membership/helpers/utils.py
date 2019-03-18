@@ -1,11 +1,14 @@
+import os
 import random
 import string
 import traceback
+import uuid
 
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
 from sendsms import api
 from django.urls import reverse
 from django.conf import settings
@@ -62,6 +65,7 @@ class CustomFileBasedEmailBackend(EmailBackend):
         if getattr(settings, 'EMAIL_BODY_TO_CONSOLE') is True:
             print(message.body)
         return res
+
 
 def random_id(n=8, no_upper=False, no_lower=False, no_digit=False):
     rand = random.SystemRandom()

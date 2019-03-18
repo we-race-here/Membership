@@ -3,7 +3,7 @@ from django.contrib.auth.views import PasswordChangeView
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
@@ -55,6 +55,7 @@ class ProfileView(PermissionRequiredMixin, UpdateView):
     permission_required = ()
     form_class = ProfileForm
     template_name = 'membership/profile.html'
+    success_url = reverse_lazy('membership:profile')
 
     def get_object(self, queryset=None):
         return self.request.user
@@ -64,10 +65,13 @@ class ProfileView(PermissionRequiredMixin, UpdateView):
         success_message('Profile updated successfully.', self.request)
         return result
 
-    def get_success_url(self):
-        return reverse('membership:profile')
-
 
 class ChangePasswordView(PermissionRequiredMixin, PasswordChangeView):
     permission_required = ()
+    success_url = reverse_lazy('membership:change-password')
     template_name = 'membership/change_password.html'
+
+    def form_valid(self, form):
+        result = super(ChangePasswordView, self).form_valid(form)
+        success_message('Password changed successfully.', self.request)
+        return result

@@ -40,8 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.humanize',
     'bootstrap4',
-    'anymail',
     'django_filters',
+    'phonenumber_field',
+    'anymail',
     'apps.membership',
 ]
 
@@ -124,6 +125,10 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
+
+# Custom Django auth settings
+
+AUTH_USER_MODEL = 'membership.User'
 
 LOGIN_URL = '/login'
 LOGIN_REDIRECT_URL = '/'

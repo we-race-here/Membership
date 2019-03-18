@@ -10,3 +10,6 @@ django-anymail[mailgun]==6.0
 django-sendsms==0.3.1
 twilio==6.24.1
 isodate==0.6.0
+pillow==5.4.1
+phonenumbers==8.10.7
+django-phonenumber-field==2.2.0
