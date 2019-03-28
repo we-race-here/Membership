@@ -51,14 +51,22 @@ class User(AbstractUser):
         (GENDER_OTHER, 'Other'),
         (GENDER_UNKNOWN, 'Unknown'),
     )
+    email = models.EmailField(null=True, unique=True)
     is_racer = models.BooleanField(default=False)
     is_staff_promotor = models.BooleanField(default=False)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default=GENDER_UNKNOWN)
     avatar = models.ImageField(blank=True, null=True, upload_to=avatar_file_path_func)
 
+    def save(self, *args, **kwargs):
+        if self.email:
+            self.email = self.email.lower()
+        if self.username:
+            self.username = self.username.lower()
+        super().save(*args, **kwargs)
+
 
 class Racer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     uid = models.CharField('Racer ID', max_length=16, unique=True)
     birth_date = models.DateField()
     phone = PhoneNumberField(max_length=50, null=True, blank=True)
@@ -67,8 +75,9 @@ class Racer(models.Model):
     city = models.CharField(max_length=128, blank=True, null=True)
     state = models.CharField(max_length=128, blank=True, null=True)
     zipcode = models.CharField(max_length=10, blank=True, null=True)
-    race_category = models.ForeignKey('RaceCategory', on_delete=models.SET_NULL, null=True, related_name='racer')
-    licenses = models.ManyToManyField('License', through='RacerLicense')
+    race_category = models.ForeignKey('RaceCategory', on_delete=models.SET_NULL, null=True, blank=True,
+                                      related_name='racer')
+    licenses = models.ManyToManyField('License', through='RacerLicense', blank=True)
 
     @property
     def year_age(self):
@@ -102,7 +111,7 @@ class Racer(models.Model):
 
 
 class Staff(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
     promotors = models.ManyToManyField('Promotor')
 
     def __str__(self):

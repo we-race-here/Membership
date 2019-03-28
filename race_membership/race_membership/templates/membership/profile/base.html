@@ -1,0 +1,42 @@
+{% extends "membership/base.html" %}
+{% load staticfiles %}
+{% load util_tags %}
+{% load bootstrap4 %}
+
+{% block breadcrumb_items %}
+  <li class="breadcrumb-item active" aria-current="page">Profile</li>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card-header">
+      <ul class="nav nav-tabs card-header-tabs">
+        <li class="nav-item">
+          <a class="nav-link {% active_if 'membership:profile-basic-info' %}" href="{% url 'membership:profile-basic-info' %}">
+            Basic Info
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% active_if 'membership:profile-racer' %}" href="{% url 'membership:profile-racer' %}">
+            Racer Profile
+            {% if user.is_racer %}
+              <i class="fas fa-check-circle text-success"></i>
+            {% endif %}
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% active_if 'membership:profile-promotor-staff' %}" href="{% url 'membership:profile-promotor-staff' %}">
+            Promotor Staff Profile
+            {% if user.is_staff_promotor %}
+              <i class="fas fa-check-circle text-success"></i>
+            {% endif %}
+          </a>
+        </li>
+      </ul>
+    </div>
+    <div class="card-body">
+    {% block tab_content %}
+    {% endblock tab_content %}
+    </div>
+  </div>
+{% endblock %}

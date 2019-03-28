@@ -143,45 +143,54 @@ table th a:hover {
   text-align: center;
 }
 
-.form-signin {
-  max-width: 330px;
-  padding: 15px;
-  margin: 0 auto;
+.my-login-page .brand img {
+	width: 100%;
 }
 
-.form-signin .form-signin-heading,
-.form-signin .checkbox {
-  margin-bottom: 10px;
+.my-login-page .card-wrapper {
+	width: 400px;
 }
 
-.form-signin .checkbox {
-  font-weight: normal;
+.my-login-page .card {
+	border-color: transparent;
+	box-shadow: 0 4px 8px rgba(0,0,0,.05);
 }
 
-.form-signin .form-control {
-  position: relative;
-  height: auto;
-  -webkit-box-sizing: border-box;
-     -moz-box-sizing: border-box;
-          box-sizing: border-box;
-  padding: 10px;
-  font-size: 16px;
+.my-login-page .card.fat {
+	padding: 10px;
 }
 
-.form-signin .form-control:focus {
-  z-index: 2;
+.my-login-page .card .card-title {
+	margin-bottom: 30px;
 }
 
-.form-signin input[type="email"] {
-  margin-bottom: -1px;
-  border-bottom-right-radius: 0;
-  border-bottom-left-radius: 0;
+.my-login-page .form-control {
+	border-width: 2.3px;
 }
 
-.form-signin input[type="password"] {
-  margin-bottom: 10px;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
+.my-login-page .form-group label {
+	width: 100%;
+}
+
+.my-login-page .btn.btn-block {
+	padding: 12px 10px;
+}
+
+@media screen and (max-width: 425px) {
+	.my-login-page .card-wrapper {
+		width: 90%;
+		margin: 0 auto;
+	}
+}
+
+@media screen and (max-width: 320px) {
+	.my-login-page .card.fat {
+		padding: 0;
+	}
+
+	.my-login-page .card.fat .card-body {
+		padding: 15px;
+	}
 }
 
 .page-title {
@@ -237,5 +246,9 @@ table th a:hover {
 }
 
 .table-header-highlight {
-    background-color: #e0e0e0 !important;
+  background-color: #e0e0e0 !important;
+}
+
+.form-check {
+  padding-left: 0;
 }

@@ -148,7 +148,6 @@ MEDIA_URL = '/media/'
 
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
-
 # email setting
 EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
 ANYMAIL = {
@@ -162,3 +161,8 @@ SENDSMS_BACKEND = 'sendsms.backends.twiliorest.SmsBackend'
 SENDSMS_TWILIO_ACCOUNT_SID = 'SIDXXXXXXXXXXXXXXX'
 SENDSMS_TWILIO_AUTH_TOKEN = 'ATXXXXXXXXXXXXXXX'
 SMS_DEFAULT_FROM_PHONE = 'NNNNNNNNNN'
+
+SIGNUP_ACTIVATION_SALT = 'signup-activation'
+SIGNUP_ACTIVATION_AGE = 24 * 3600  # 1 day
+RECOVERY_PASSWORD_SALT = 'recovery-password'
+RECOVERY_PASSWORD_AGE = 3600  # 1 hour

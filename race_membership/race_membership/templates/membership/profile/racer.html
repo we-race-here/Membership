@@ -1,0 +1,48 @@
+{% extends "membership/profile/base.html" %}
+{% load util_tags %}
+{% load bootstrap4 %}
+{% load static %}
+
+{% block extra_css %}
+  <link href="{% static 'css/bootstrap4-toggle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
+
+{% block breadcrumb_items %}
+  <li class="breadcrumb-item"><a href="{% url 'membership:profile-basic-info' %}">Profile</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Racer</li>
+{% endblock %}
+
+{% block tab_content %}
+  <form enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      {% if field.name == 'birth_date' %}
+        {% bootstrap_field field layout='horizontal' form_group_class='form-group row' horizontal_label_class='col-md-2' field_class='col-md-10' addon_after='<span class="fa fa-calendar"></span>' %}
+      {% else %}
+        {% bootstrap_field field layout='horizontal' form_group_class='form-group row' horizontal_label_class='col-md-2' field_class='col-md-10' %}
+      {% endif %}
+    {% endfor %}
+    <hr>
+    <div class="form-group row">
+      <label class="col-md-2 col-form-label form-control-label"></label>
+      <div class="col-md-10">
+        <button type="submit" class="btn btn-primary" name="submit">Save</button>
+        <a class="btn btn-secondary" href="{% url 'membership:index' %}">Cancel</a>
+      </div>
+    </div>
+  </form>
+
+{% endblock %}
+
+{% block extra_js %}
+  <script src="{% static 'js/bootstrap4-toggle.min.js' %}"></script>
+  <script src="{% static 'js/moment.min.js' %}"></script>
+  <script src="{% static 'js/tempusdominus-bootstrap-4.min.js' %}"></script>
+  <script src="{% static 'js/utils.js' %}"></script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      dateTimePickerWidget('id_birth_date', {format: 'YYYY-MM-DD'});
+    });
+  </script>
+{% endblock extra_js %}
