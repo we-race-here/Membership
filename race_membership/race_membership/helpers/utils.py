@@ -1,14 +1,12 @@
-import os
+import functools
 import random
 import string
 import traceback
-import uuid
 
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.utils import timezone
 from sendsms import api
 from django.urls import reverse
 from django.conf import settings
@@ -17,6 +15,8 @@ from django.utils.safestring import mark_safe
 from django.core.mail.backends.filebased import EmailBackend
 from django.contrib.auth.mixins import PermissionRequiredMixin as \
     DjangoPermissionRequiredMixin
+
+print = functools.partial(print, flush=True)
 
 
 class PermissionRequiredMixin(DjangoPermissionRequiredMixin):
