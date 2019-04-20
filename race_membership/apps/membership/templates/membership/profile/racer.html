@@ -4,8 +4,8 @@
 {% load static %}
 
 {% block extra_css %}
-  <link href="{% static 'css/bootstrap4-toggle.min.css' %}" rel="stylesheet">
-  <link href="{% static 'css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet">
+  <link href="{% static 'dj/css/bootstrap4-toggle.min.css' %}" rel="stylesheet">
+  <link href="{% static 'dj/css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet">
 {% endblock extra_css %}
 
 {% block breadcrumb_items %}
@@ -36,10 +36,10 @@
 {% endblock %}
 
 {% block extra_js %}
-  <script src="{% static 'js/bootstrap4-toggle.min.js' %}"></script>
-  <script src="{% static 'js/moment.min.js' %}"></script>
-  <script src="{% static 'js/tempusdominus-bootstrap-4.min.js' %}"></script>
-  <script src="{% static 'js/utils.js' %}"></script>
+  <script src="{% static 'dj/js/bootstrap4-toggle.min.js' %}"></script>
+  <script src="{% static 'dj/js/moment.min.js' %}"></script>
+  <script src="{% static 'dj/js/tempusdominus-bootstrap-4.min.js' %}"></script>
+  <script src="{% static 'dj/js/utils.js' %}"></script>
   <script type="text/javascript">
     $(document).ready(function () {
       dateTimePickerWidget('id_birth_date', {format: 'YYYY-MM-DD'});
