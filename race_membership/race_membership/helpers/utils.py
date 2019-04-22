@@ -1,3 +1,4 @@
+import ast
 import base64
 import datetime
 import decimal
@@ -24,6 +25,7 @@ from rest_framework.pagination import PageNumberPagination, _positive_int
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
 from rest_framework.filters import OrderingFilter as OrderingFilterBackend
 from rest_framework.response import Response
+from rest_framework_tracking.mixins import LoggingMixin
 from sendsms import api
 from django.urls import reverse
 from django.conf import settings
@@ -141,6 +143,101 @@ class DuplicateError(APIException):
 class ServiceUnavailable(APIException):
     status_code = 503
     default_detail = 'Service temporarily unavailable, try again later.'
+
+
+class CustomLoggingMixin(LoggingMixin):
+    '''
+    Customized and enhanced LoggingMixin
+    '''
+    CLEANED_SUBSTITUTE = '****'
+    SKIPPED_SUBSTITUTE = '<<skipped>>'
+    INVALID_SUBSTITUTE = '<<invalid>>'
+    logging_methods = settings.DRF_TRACKING_LOGGING_METHODS
+    sensitive_fields = {
+        'current_password', 'new_password', 're_new_password'
+    }
+    skipped_fields = {
+        'image', 'photo', 'avatar', 'photo_thumb'
+    }
+
+    def handle_exception(self, exc):
+        response = super(CustomLoggingMixin, self).handle_exception(exc)
+        skip_errors = getattr(self, 'drf_tracking_skip_errors_data', settings.DRF_TRACKING_SKIP_ERRORS_DATA)
+        if isinstance(skip_errors, dict):
+            method = self.log.get('method')
+            skip_errors = skip_errors.get(method.lower(), False) or skip_errors.get(method.upper(), False)
+        if isinstance(exc, APIException) and exc.status_code < 500:
+            self.log.pop('errors', None)
+        elif skip_errors:
+            self.log['errors'] = self.SKIPPED_SUBSTITUTE
+        return response
+
+    def logging_skip_response(self):
+        method = self.log.get('method') or ''
+        skip_response = getattr(self, 'drf_tracking_skip_response_data', settings.DRF_TRACKING_SKIP_RESPONSE_DATA)
+        if isinstance(skip_response, dict):
+            skip_response = skip_response.get(method.lower(), False) or skip_response.get(method.upper(), False)
+        return skip_response
+
+    def logging_skip_data(self):
+        method = self.log.get('method') or ''
+        skip_data = getattr(self, 'drf_tracking_skip_request_data', settings.DRF_TRACKING_SKIP_REQUEST_DATA)
+        if isinstance(skip_data, dict):
+            skip_data = skip_data.get(method.lower(), False) or skip_data.get(method.upper(), False)
+        return skip_data
+
+    def logging_skip_query_params(self):
+        method = self.log.get('method') or ''
+        skip_query_params = getattr(self, 'drf_tracking_skip_request_query_params',
+                                    settings.DRF_TRACKING_SKIP_REQUEST_QUERY_PARAMS)
+        if isinstance(skip_query_params, dict):
+            skip_query_params = skip_query_params.get(method.lower(), False) or skip_query_params.get(method.upper(),
+                                                                                                      False)
+        return skip_query_params
+
+    def handle_log(self):
+        skip_response = self.logging_skip_response()
+        skip_data = self.logging_skip_data()
+        skip_query_params = self.logging_skip_query_params()
+        if skip_response:
+            self.log['response'] = self.SKIPPED_SUBSTITUTE
+        if skip_data:
+            self.log['data'] = self.SKIPPED_SUBSTITUTE
+        if skip_query_params:
+            self.log['query_params'] = self.SKIPPED_SUBSTITUTE
+        return super(CustomLoggingMixin, self).handle_log()
+
+    def _clean_data(self, data):
+        if isinstance(data, bytes):
+            try:
+                data = data.decode()
+            except UnicodeDecodeError:
+                data = self.INVALID_SUBSTITUTE
+
+        if isinstance(data, list):
+            return [self._clean_data(d) for d in data]
+        if isinstance(data, dict):
+            SENSITIVE_FIELDS = {'api', 'token', 'key', 'secret', 'password', 'signature'}
+            SKIPPED_FIELDS = self.skipped_fields or set()
+            data = dict(data)
+            if self.sensitive_fields:
+                SENSITIVE_FIELDS = SENSITIVE_FIELDS | {field.lower() for field in self.sensitive_fields}
+
+            for key in list(data.keys()):
+                if key.lower() in SKIPPED_FIELDS:
+                    data[key] = self.SKIPPED_SUBSTITUTE
+                    continue
+                if key.lower() in SENSITIVE_FIELDS:
+                    data[key] = self.CLEANED_SUBSTITUTE
+                    continue
+                value = data[key]
+                try:
+                    value = ast.literal_eval(value)
+                except (ValueError, SyntaxError):
+                    pass
+                if isinstance(value, list) or isinstance(value, dict):
+                    data[key] = self._clean_data(value)
+        return data
 
 
 class PermissionRequiredMixin(DjangoPermissionRequiredMixin):

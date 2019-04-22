@@ -61,7 +61,7 @@ const router = new VueRouter({
 });
 
 router.afterEach(function(toRoute) {
-  var title = "Chills-Students :: ",
+  var title = "Race-Membership :: ",
     pageInfo = toRoute.meta.pageInfo || {};
   if (pageInfo.title) {
     title = title + pageInfo.title + " :: ";

@@ -15,7 +15,7 @@ from rest_framework.response import Response
 from reversion.models import Version
 
 from apps.membership.rest_api.serializers import SessionSerializer, UserSessionSerializer, UserProfileSerializer
-from race_membership.helpers.utils import ExtendedOrderingFilterBackend
+from race_membership.helpers.utils import ExtendedOrderingFilterBackend, CustomLoggingMixin as LoggingMixin
 
 
 class HistoricalViewMixin(object):
@@ -97,7 +97,7 @@ class HistoricalViewMixin(object):
     #     return serializer.save()
 
 
-class SessionView(viewsets.ViewSet):
+class SessionView(LoggingMixin, viewsets.ViewSet):
     class SessionPermission(permissions.BasePermission):
         """ custom class to check permissions for sessions """
 
@@ -137,7 +137,7 @@ class SessionView(viewsets.ViewSet):
     create = post  # this is a trick to show this view in api-root
 
 
-class ProfileView(viewsets.ViewSet):
+class ProfileView(LoggingMixin, viewsets.ViewSet):
     permission_classes = (permissions.IsAuthenticated,)
     serializer_class = UserProfileSerializer
     parser_classes = list(viewsets.ViewSet.parser_classes) + [FileUploadParser]
@@ -154,5 +154,5 @@ class ProfileView(viewsets.ViewSet):
     create = put
 
 
-class SetPasswordView(JoserSetPasswordView):
+class SetPasswordView(LoggingMixin, JoserSetPasswordView):
     pass

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bootstrap4',
     'django_filters',
     'rest_framework',
+    'rest_framework_tracking',
     'phonenumber_field',
     'reversion',
     'corsheaders',
@@ -255,6 +256,14 @@ SENDSMS_TWILIO_ACCOUNT_SID = 'SIDXXXXXXXXXXXXXXX'
 SENDSMS_TWILIO_AUTH_TOKEN = 'ATXXXXXXXXXXXXXXX'
 SMS_DEFAULT_FROM_PHONE = 'NNNNNNNNNN'
 
+# drf_tracking settings
+DRF_TRACKING_LOGGING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
+DRF_TRACKING_SKIP_RESPONSE_DATA = {'get': True, 'option': True, 'head': True}
+DRF_TRACKING_SKIP_REQUEST_DATA = False
+DRF_TRACKING_SKIP_REQUEST_QUERY_PARAMS = False
+DRF_TRACKING_SKIP_ERRORS_DATA = False
+
+# project specific settings
 SIGNUP_ACTIVATION_SALT = 'signup-activation'
 SIGNUP_ACTIVATION_AGE = 24 * 3600  # 1 day
 RECOVERY_PASSWORD_SALT = 'recovery-password'

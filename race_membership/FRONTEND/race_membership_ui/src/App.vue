@@ -1,12 +1,15 @@
 <style scoped>
 .app-version-tag {
   right: unset;
+  left: 80px;
   border-radius: 0;
+  background-color: #b37b11;
 }
 </style>
 
 <template>
   <div class="kt-grid kt-grid--hor kt-grid--root">
+    <span title="Ui Version" class="fixed-top badge badge-danger app-version-tag">{{ $appVersion }}</span>
     <template v-if="$store.getters.isLoadedUser">
       <main-layout></main-layout>
     </template>
