@@ -66,7 +66,7 @@ class User(AbstractUser):
 
 
 class Racer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='racer')
     uid = models.CharField('Racer ID', max_length=16, unique=True)
     birth_date = models.DateField()
     phone = PhoneNumberField(max_length=50, null=True, blank=True)
@@ -110,8 +110,8 @@ class Racer(models.Model):
         return str(self.user)
 
 
-class Staff(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
+class StaffPromotor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='staff_promotor')
     promotors = models.ManyToManyField('Promotor')
 
     def __str__(self):

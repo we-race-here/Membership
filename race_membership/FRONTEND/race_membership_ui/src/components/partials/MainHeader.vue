@@ -83,7 +83,7 @@
           </div>
 
           <div class="kt-notification">
-            <a href="javascript:" class="kt-notification__item">
+            <a is="router-link" :to="{name: $rns.MYPROFILE}" class="kt-notification__item">
               <div class="kt-notification__item-icon">
                 <i class="flaticon2-calendar-3 kt-font-success"></i>
               </div>
@@ -92,7 +92,7 @@
                   My Profile
                 </div>
                 <div class="kt-notification__item-time">
-                  Account settings and more
+                  User, Racer and Staff promotors profile
                 </div>
               </div>
             </a>

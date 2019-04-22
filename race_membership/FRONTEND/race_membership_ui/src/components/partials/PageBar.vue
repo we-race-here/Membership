@@ -19,7 +19,7 @@
         <div class="kt-subheader__breadcrumbs">
           <slot name="breadcrumb-items">
             <a is="router-link" :to="{name: $rns.ROOT}" class="kt-subheader__breadcrumbs-home">
-              <i class="flaticon2-shelter"></i>
+              <i class="fas fa-home"></i>
             </a>
             <template v-if="$route.meta.pageInfo.back">
               <span class="kt-subheader__breadcrumbs-separator"></span>

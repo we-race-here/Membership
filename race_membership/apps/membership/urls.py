@@ -1,12 +1,14 @@
 from django.urls import re_path
 from .views import (
     IndexView, LoginView, LogoutView, ProfileBasicInfoView, ChangePasswordView, SignUpView,
-    ActivationSignUpView, ForgotPasswordView, PasswordRecoveryView, ProfileRacerView, ProfilePromotorStaffView)
+    ActivationSignUpView, ForgotPasswordView, PasswordRecoveryView, ProfileRacerView, ProfilePromotorStaffView,
+    UiPanelView)
 
 app_name = 'membership'
 
 urlpatterns = [
     re_path(r'^$', IndexView.as_view(), name='index'),
+    re_path(r'^ui-panel/$', UiPanelView.as_view(), name='ui-panel'),
     re_path(r'^login/$', LoginView.as_view(), name="login"),
     re_path(r'^logout/$', LogoutView.as_view(), name="logout"),
     re_path(r'^signup/$', SignUpView.as_view(), name="signup"),

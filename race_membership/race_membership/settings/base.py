@@ -189,7 +189,7 @@ PHONENUMBER_DB_FORMAT = 'RFC3966'
 AUTH_USER_MODEL = 'membership.User'
 
 LOGIN_URL = '/login'
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/ui-panel'
 
 
 # Static files (CSS, JavaScript, Images)

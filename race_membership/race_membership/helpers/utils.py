@@ -1,3 +1,4 @@
+import base64
 import datetime
 import decimal
 import functools
@@ -5,16 +6,19 @@ import inspect
 import random
 import string
 import traceback
+import uuid
 
 from django.contrib.auth.views import redirect_to_login
 from django.core.exceptions import PermissionDenied, RequestDataTooBig
+from django.core.files.base import ContentFile
+from django.core.files.uploadedfile import UploadedFile
 from django.db import IntegrityError
 from django.db.models import ProtectedError
 from django.http import JsonResponse
 from django.shortcuts import render
 from django_filters import OrderingFilter
 from django_filters.constants import EMPTY_VALUES
-from rest_framework import status
+from rest_framework import status, serializers
 from rest_framework.exceptions import APIException
 from rest_framework.pagination import PageNumberPagination, _positive_int
 from rest_framework.permissions import BasePermission, DjangoModelPermissions
@@ -172,6 +176,19 @@ class PermissionRequiredMixin(DjangoPermissionRequiredMixin):
             return self.handle_no_permission()
         return super(PermissionRequiredMixin, self
                      ).dispatch(request, *args, **kwargs)
+
+
+class Base64ImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        if not isinstance(data, UploadedFile):
+            if hasattr(data, 'read'):
+                data = data.read().decode()
+            if data.startswith('data:image'):
+                fmt, imgstr = data.split(';base64,')  # fmt ~= data:image/X,
+                ext = fmt.split('/')[-1]  # guess file extension
+                uid = uuid.uuid4()
+                data = ContentFile(base64.b64decode(imgstr), name=uid.urn[9:] + '.' + ext)
+        return super(Base64ImageField, self).to_internal_value(data)
 
 
 class CustomFileBasedEmailBackend(EmailBackend):

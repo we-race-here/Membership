@@ -1,8 +1,9 @@
+from django.db import transaction
 from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
 
-from apps.membership.models import User
-from race_membership.helpers.utils import DynamicFieldsSerializerMixin
+from apps.membership.models import User, Racer, StaffPromotor
+from race_membership.helpers.utils import DynamicFieldsSerializerMixin, Base64ImageField
 
 
 class SessionSerializer(serializers.Serializer):
@@ -25,6 +26,20 @@ class NestedGroupSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'permissions')
 
 
+class RacerProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Racer
+        fields = '__all__'
+        read_only_fields = ('uid', 'user', 'licenses')
+
+
+class StaffPromotorProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StaffPromotor
+        fields = '__all__'
+        read_only_fields = ('user', 'promotors')
+
+
 class UserSessionSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
     user_permissions = PermissionSerializer(read_only=True, many=True)
     groups = NestedGroupSerializer(read_only=True, many=True)
@@ -32,3 +47,50 @@ class UserSessionSerializer(DynamicFieldsSerializerMixin, serializers.ModelSeria
     class Meta:
         model = User
         exclude = ('password',)
+
+
+class UserProfileSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+    avatar = Base64ImageField(required=False, allow_null=True)
+    racer = RacerProfileSerializer(required=False, allow_null=True)
+    staff_promotor = StaffPromotorProfileSerializer(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'first_name', 'last_name', 'email', 'gender', 'avatar', 'is_staff_promotor', 'is_racer',
+                  'racer', 'staff_promotor')
+        read_only_fields = ('email', 'username')
+
+    @transaction.atomic()
+    def update(self, instance, validated_data):
+        racer_data = validated_data.pop('racer', {})
+        if racer_data:
+            try:
+                racer_object = instance.racer
+            except Racer.DoesNotExist:
+                racer_object = None
+            if not racer_object:
+                racer_object = Racer(user=instance)
+            for k, v in racer_data.items():
+                setattr(racer_object, k, v)
+            racer_object.save()
+
+        staff_promotor_data = validated_data.pop('staff_promotor', {})
+        if staff_promotor_data:
+            try:
+                staff_promotor_object = instance.staff_promotor
+            except StaffPromotor.DoesNotExist:
+                staff_promotor_object = None
+            if not staff_promotor_object:
+                staff_promotor_object = StaffPromotor(user=instance)
+            for k, v in staff_promotor_data.items():
+                setattr(staff_promotor_object, k, v)
+            staff_promotor_object.save()
+        return super(UserProfileSerializer, self).update(instance, validated_data)
+
+    def to_representation(self, instance):
+        res = super(UserProfileSerializer, self).to_representation(instance)
+        if not res.get('racer'):
+            res['racer'] = {}
+        if not res.get('staff_promotor'):
+            res['staff_promotor'] = {}
+        return res

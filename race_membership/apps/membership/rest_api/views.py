@@ -10,10 +10,11 @@ from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
+from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from reversion.models import Version
 
-from apps.membership.rest_api.serializers import SessionSerializer, UserSessionSerializer
+from apps.membership.rest_api.serializers import SessionSerializer, UserSessionSerializer, UserProfileSerializer
 from race_membership.helpers.utils import ExtendedOrderingFilterBackend
 
 
@@ -109,13 +110,6 @@ class SessionView(viewsets.ViewSet):
     permission_classes = (SessionPermission,)
     serializer_class = SessionSerializer
 
-    # def initialize_request(self, request, *args, **kwargs):
-    #     request = super(SessionView, self).initialize_request(request, *args, **kwargs)
-    #     if request.method == 'POST':
-    #         # remove authentication_classes to dont check csrf
-    #         request.authenticators = []
-    #     return request
-
     def get(self, request, *args, **kwargs):
         """ api to get current session """
         return Response(UserSessionSerializer(request.user, context={'request': request}).data)
@@ -143,6 +137,22 @@ class SessionView(viewsets.ViewSet):
     create = post  # this is a trick to show this view in api-root
 
 
+class ProfileView(viewsets.ViewSet):
+    permission_classes = (permissions.IsAuthenticated,)
+    serializer_class = UserProfileSerializer
+    parser_classes = list(viewsets.ViewSet.parser_classes) + [FileUploadParser]
+
+    def list(self, request, *args, **kwargs):
+        return Response(self.serializer_class(request.user, context={'request': request}).data)
+
+    def put(self, request, *args, **kwargs):
+        serializer = self.serializer_class(instance=request.user, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        return Response(self.serializer_class(user, context={'request': request}).data)
+
+    create = put
+
+
 class SetPasswordView(JoserSetPasswordView):
-    def post(self, request, *args, **kwargs):
-        return super(SetPasswordView, self).post(request)
+    pass

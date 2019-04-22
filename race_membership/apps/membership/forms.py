@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms.widgets import PasswordInput, TextInput, EmailInput
 from django import forms
 
-from apps.membership.models import Racer, User, Staff
+from apps.membership.models import Racer, User, StaffPromotor
 
 boolean_toggle_attrs = {
     'data-onstyle': 'success', 'data-offstyle': 'danger', 'data-toggle': 'toggle', 'data-on': 'Enabled',
@@ -174,7 +174,7 @@ class ProfilePromotorStaffForm(forms.ModelForm):
     field_order = ['enabled']
 
     class Meta:
-        model = Staff
+        model = StaffPromotor
         exclude = ['user', 'promotors']
 
     def __init__(self, user, *args, **kwargs):

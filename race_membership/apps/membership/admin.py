@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm
 
-from .models import User, Staff, Racer, Promotor, RaceCategory, RaceType, Race, RaceResult, Event, License, RacerLicense
+from .models import User, StaffPromotor, Racer, Promotor, RaceCategory, RaceType, Race, RaceResult, Event, License, RacerLicense
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -19,7 +19,7 @@ class MyUserAdmin(UserAdmin):
 
 
 admin.site.register(User, MyUserAdmin)
-admin.site.register(Staff)
+admin.site.register(StaffPromotor)
 admin.site.register(Racer)
 admin.site.register(Promotor)
 admin.site.register(RaceCategory)

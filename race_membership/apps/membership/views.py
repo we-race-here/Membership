@@ -14,18 +14,24 @@ from django.views.generic import UpdateView
 
 from apps.membership.forms import (ProfileBasicInfoForm, LoginForm, SignUpForm, ActivationSignUpForm,
                                    ForgotPasswordForm, PasswordRecoveryForm, ProfileRacerForm, ProfilePromotorStaffForm)
-from apps.membership.models import User, Racer, Staff
+from apps.membership.models import User, Racer, StaffPromotor
 from race_membership.helpers.shortcuts import unsign
 from race_membership.helpers.utils import PermissionRequiredMixin, success_message, send_form_errors, ex_reverse, \
     error_message
 
 
-class IndexView(PermissionRequiredMixin, View):
-    permission_required = ()
+class IndexView(View):
 
     def get(self, request, *args, **kwargs):
         ctx = {}
         return render(request, 'membership/index.html', ctx)
+
+
+class UiPanelView(PermissionRequiredMixin, View):
+    permission_required = ()
+
+    def get(self, request, *args, **kwargs):
+        return redirect('/static/vue/index.html')
 
 
 class LoginView(View):
@@ -223,7 +229,8 @@ class LogoutView(View):
 
     def get(self, request, *args, **kwargs):
         auth_logout(request)
-        return redirect(settings.LOGIN_URL)
+        next_url = request.headers.get('Referer') or 'membership:index'
+        return redirect(next_url)
 
 
 class ProfileBasicInfoView(PermissionRequiredMixin, UpdateView):
@@ -277,13 +284,13 @@ class ProfilePromotorStaffView(PermissionRequiredMixin, UpdateView):
 
     def get_object(self, queryset=None):
         try:
-            return self.request.user.staff
-        except Staff.DoesNotExist:
+            return self.request.user.staff_promotor
+        except StaffPromotor.DoesNotExist:
             return None
 
     def form_valid(self, form):
         result = super().form_valid(form)
-        success_message('Promotor Staff Profile updated successfully.', self.request)
+        success_message('Staff Promotor Profile updated successfully.', self.request)
         return result
 
 

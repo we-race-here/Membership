@@ -13,6 +13,8 @@ import App from "./App";
 import { Config } from "./Config";
 import { UI_VERSION_HEADER_NAME } from "./Constants";
 import UtilMixin from "./components/mixins/UtilMixin";
+import "./validators";
+
 import "./filters";
 import { version as AppVersion } from "../package.json";
 

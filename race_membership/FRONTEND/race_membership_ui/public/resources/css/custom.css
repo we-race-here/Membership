@@ -14,3 +14,12 @@
   -ms-flex-align: center;
   align-items: center;
 }
+
+.thumbnail-photo {
+  width: auto;
+  height: 128px;
+}
+
+.pointer-cursor {
+  cursor: pointer;
+}
