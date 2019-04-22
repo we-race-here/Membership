@@ -27,9 +27,7 @@ class IndexView(View):
         return render(request, 'membership/index.html', ctx)
 
 
-class UiPanelView(PermissionRequiredMixin, View):
-    permission_required = ()
-
+class UiPanelView(View):
     def get(self, request, *args, **kwargs):
         return redirect('/static/vue/index.html')
 
