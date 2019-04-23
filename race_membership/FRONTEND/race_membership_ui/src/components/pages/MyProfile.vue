@@ -415,7 +415,7 @@ export default {
     changePassword: function() {
       var self = this;
       this.changingPassword = true;
-      this.$http.post("me/password", this.userPassword).then(
+      this.$http.put("me/password", this.userPassword).then(
         function() {
           self.userPassword = {};
           self.changingPassword = false;

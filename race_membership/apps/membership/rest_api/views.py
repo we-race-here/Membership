@@ -1,12 +1,9 @@
-from datetime import timedelta
-
 import django_filters
 import simplejson as json
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django_filters import rest_framework as filters
-from djoser.views import SetPasswordView as JoserSetPasswordView
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
@@ -14,7 +11,8 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from reversion.models import Version
 
-from apps.membership.rest_api.serializers import SessionSerializer, UserSessionSerializer, UserProfileSerializer
+from apps.membership.rest_api.serializers import SessionSerializer, UserSessionSerializer, UserProfileSerializer, \
+    SetPasswordSerializer
 from race_membership.helpers.utils import ExtendedOrderingFilterBackend, CustomLoggingMixin as LoggingMixin
 
 
@@ -151,8 +149,13 @@ class ProfileView(LoggingMixin, viewsets.ViewSet):
         user = serializer.save()
         return Response(self.serializer_class(user, context={'request': request}).data)
 
+    @action(detail=False, methods=['PUT'])
+    def password(self, request, *args, **kwargs):
+        serializer = SetPasswordSerializer(data=request.data, context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        self.request.user.set_password(serializer.validated_data['new_password'])
+        self.request.user.save(update_fields=['password'])
+
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
     create = put
-
-
-class SetPasswordView(LoggingMixin, JoserSetPasswordView):
-    pass

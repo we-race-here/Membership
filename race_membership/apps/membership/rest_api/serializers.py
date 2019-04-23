@@ -1,6 +1,8 @@
+from django.contrib.auth.password_validation import validate_password
 from django.db import transaction
 from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
+from django.core import exceptions as django_exceptions
 
 from apps.membership.models import User, Racer, StaffPromotor
 from race_membership.helpers.utils import DynamicFieldsSerializerMixin, Base64ImageField
@@ -16,6 +18,29 @@ class PermissionSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerial
     class Meta:
         model = Permission
         fields = ('id', 'name', 'codename')
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    new_password = serializers.CharField(style={'input_type': 'password'})
+    current_password = serializers.CharField(style={'input_type': 'password'})
+
+    default_error_messages = {
+        'invalid_password': 'Invalid Password',
+    }
+
+    def validate_current_password(self, value):
+        is_password_valid = self.context['request'].user.check_password(value)
+        if is_password_valid:
+            return value
+        else:
+            self.fail('invalid_password')
+
+    def validate_new_password(self, new_password):
+        try:
+            validate_password(new_password, self.context['request'].user)
+        except django_exceptions.ValidationError as e:
+            raise serializers.ValidationError({'new_password': list(e.messages)})
+        return new_password
 
 
 class NestedGroupSerializer(serializers.ModelSerializer):
