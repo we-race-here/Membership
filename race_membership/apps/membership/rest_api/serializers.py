@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
 from django.core import exceptions as django_exceptions
 
-from apps.membership.models import User, Racer, StaffPromotor
+from apps.membership.models import User, Racer, StaffPromotor, Event, Promotor
 from race_membership.helpers.utils import DynamicFieldsSerializerMixin, Base64ImageField
 
 
@@ -119,3 +119,18 @@ class UserProfileSerializer(DynamicFieldsSerializerMixin, serializers.ModelSeria
         if not res.get('staff_promotor'):
             res['staff_promotor'] = {}
         return res
+
+
+class NestedPromotorSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+
+    class Meta:
+        model = Promotor
+        fields = ('id', 'name',)
+
+
+class EventSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+    _promotor = NestedPromotorSerializer(read_only=True, source='promotor')
+
+    class Meta:
+        model = Event
+        fields = '__all__'

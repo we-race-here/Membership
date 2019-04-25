@@ -6,15 +6,15 @@ from django.shortcuts import render, redirect
 
 # Create your views here.
 from django.template.loader import render_to_string
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse_lazy
 from django.views import View
 from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
-from django.views.generic import UpdateView
+from django.views.generic import UpdateView, TemplateView
 
 from apps.membership.forms import (ProfileBasicInfoForm, LoginForm, SignUpForm, ActivationSignUpForm,
                                    ForgotPasswordForm, PasswordRecoveryForm, ProfileRacerForm, ProfilePromotorStaffForm)
-from apps.membership.models import User, Racer, StaffPromotor
+from apps.membership.models import User, Racer, StaffPromotor, Event
 from race_membership.helpers.shortcuts import unsign
 from race_membership.helpers.utils import PermissionRequiredMixin, success_message, send_form_errors, ex_reverse, \
     error_message
@@ -301,3 +301,7 @@ class ChangePasswordView(PermissionRequiredMixin, PasswordChangeView):
         result = super(ChangePasswordView, self).form_valid(form)
         success_message('Password changed successfully.', self.request)
         return result
+
+
+class EventListView(TemplateView):
+    template_name = 'membership/event_list.html'

@@ -11,8 +11,10 @@ from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from reversion.models import Version
 
+from apps.membership.models import Event
+from apps.membership.rest_api.filters import EventFilter
 from apps.membership.rest_api.serializers import SessionSerializer, UserSessionSerializer, UserProfileSerializer, \
-    SetPasswordSerializer
+    SetPasswordSerializer, EventSerializer
 from race_membership.helpers.utils import ExtendedOrderingFilterBackend, CustomLoggingMixin as LoggingMixin
 
 
@@ -159,3 +161,18 @@ class ProfileView(LoggingMixin, viewsets.ViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     create = put
+
+
+class EventView(LoggingMixin, HistoricalViewMixin, viewsets.ModelViewSet):
+    queryset = Event.objects.all()
+    serializer_class = EventSerializer
+    filter_class = EventFilter
+    max_page_size = 0
+    ordering = '-start_date'
+    ordering_fields = '__all__'
+    search_fields = ['name', 'promotor__name', 'location']
+
+    def check_permissions(self, request):
+        if self.action in ('list', 'retrieve'):  # make event-list and event-retrieve as public
+            return
+        return super().check_permissions(request)

@@ -1,0 +1,38 @@
+{% extends "membership/base.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+{% load util_tags %}
+
+{% block breadcrumb_items %}
+  <li class="breadcrumb-item active" aria-current="page">Events</li>
+{% endblock %}
+
+{% block content %}
+  <div class="card">
+    <div class="card-header">
+      <h4 class="mb-0">Event List</h4>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped sortable">
+        <thead class="thead-dark">
+          <tr>
+            <th>Event Name</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Location</th>
+            <th>Promotor</th>
+            <th>Event Url</th>
+            <th>Event Flyer</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="text-center text-muted" colspan="7"><em>[NO RECORD!]</em></td>
+          </tr>
+        </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% endblock content %}

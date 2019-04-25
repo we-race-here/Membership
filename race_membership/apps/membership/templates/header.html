@@ -12,10 +12,10 @@
       <div class="collapse navbar-collapse" id="navbarCollapse">
         <ul class="navbar-nav mr-auto">
           {% if user.is_authenticated %}
-          <li class="nav-item {% active_if 'membership:index' %}">
-            <a class="nav-link" href="{% url 'membership:index' %}"><span class="fa fa-home"></span> Home</a>
-          </li>
           {% endif %}
+          <li class="nav-item {% active_if 'membership:event-list' %}">
+            <a class="nav-link" href="{% url 'membership:event-list' %}"><i class="fas fa-th-list"></i> Events</a>
+          </li>
           <li class="nav-item">
             <a class="nav-link" href="javascript:"><i class="fas fa-info-circle"></i> About</a>
           </li>

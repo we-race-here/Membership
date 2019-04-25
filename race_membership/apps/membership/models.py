@@ -40,6 +40,10 @@ def event_flyer_path_func(instance, filename):
     return get_random_upload_path(os.path.join('uploads', 'event', 'flyer'), filename)
 
 
+def event_image_file_path_func(instance, filename):
+    return get_random_upload_path(os.path.join('uploads', 'event', 'image'), filename)
+
+
 class User(AbstractUser):
     GENDER_MALE = 'm'
     GENDER_FEMALE = 'f'
@@ -182,9 +186,12 @@ class Event(models.Model):
     start_date = models.DateField()
     end_date = models.DateField()
     location = models.CharField(max_length=128)
+    map_latitude = models.DecimalField(max_digits=9, decimal_places=7, null=True, blank=True)
+    map_longitude = models.DecimalField(max_digits=10, decimal_places=7, null=True, blank=True)
     promotor = models.ForeignKey(Promotor, on_delete=models.CASCADE)
     event_url = models.URLField(null=True, blank=True)
     event_flyer = models.FileField(max_length=256, null=True, blank=True, upload_to=event_flyer_path_func)
+    image = models.ImageField(blank=True, null=True, upload_to=event_image_file_path_func)
 
     def __str__(self):
         return str(self.name)

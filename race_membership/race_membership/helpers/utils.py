@@ -577,3 +577,15 @@ def send_form_errors(form, request):
 
     if msgs:
         return error_message(''.join(msgs), request)
+
+
+def get_current_page_size(request, default=None):
+    page_size = default or settings.PAGINATION_DEFAULT_PAGINATION
+    try:
+        page_size = int(request.GET.get('page_size'))
+    except (ValueError, TypeError):
+        pass
+
+    if page_size <= 0:
+        page_size = default or settings.PAGINATION_DEFAULT_PAGINATION
+    return min(page_size, settings.PAGINATION_MAX_SIZE)

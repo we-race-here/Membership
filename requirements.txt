@@ -1,4 +1,4 @@
-Django==2.2
+django==2.2
 djangorestframework==3.9.2
 djangorestframework-filters==0.10.2
 djangorestframework-jwt==1.11.0
@@ -11,7 +11,6 @@ bootstrap-admin==0.4.3
 django-sendsms==0.3.1
 django-anymail[mailgun]==6.0
 django-phonenumber-field==2.3.1
-djoser==1.5.1
 phonenumbers==8.10.10
 simplejson==3.16.0
 psycopg2-binary==2.8.2

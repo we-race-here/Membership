@@ -155,3 +155,18 @@ def ex_url(context, name, *args, **kwargs):
         return hostname
     url = reverse(name, args=args, kwargs=kwargs)
     return '{0}{1}'.format(hostname, url)
+
+
+# noinspection PyUnusedLocal
+@register.simple_tag(takes_context=True)
+def page_size_combo(context, *sizes, **kwargs):
+    if not sizes:
+        sizes = (10, 20, 30, 50)
+    page_size = context.request.GET.get('page_size') or kwargs.get('default', None)
+    html = 'Page Size <select class="page-size" name="page_size">'
+    for size in sizes:
+        selected = ('selected' if str(size) == str(page_size) else '')
+        html += '<option value="{0}" {1}>{0}</option>'.format(
+            size, selected)
+    html += '</select>'
+    return mark_safe(html)
