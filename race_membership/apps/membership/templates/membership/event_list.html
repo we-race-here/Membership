@@ -3,6 +3,51 @@
 {% load bootstrap4 %}
 {% load util_tags %}
 
+
+{% block extra_css %}
+    <link href="{% static 'dj/css/datatables.min.css' %}" rel="stylesheet">
+    <style>
+        .dataTables_wrapper table thead {
+            display: none;
+        }
+
+        tr:not(:last-child) > div {
+            margin-bottom: 19px;
+            border-bottom: 1px solid #979797;
+        }
+
+        .event-listing:hover {
+            color: #D60B30
+        }
+
+        .event-listing:hover span {
+            color: #D60B30;
+            transition-duration: .2s;
+            transition-timing-function: ease-in
+        }
+
+        .event-listing span {
+            display: block;
+        }
+
+        .event-listing .event-heading {
+            font-size: 18px;
+            font-weight: 700;
+            color: #031E41
+        }
+
+        .event-listing .event-date,
+        .event-listing .event-info,
+        .event-listing .event-location {
+            font-size: 14px;
+            color: #979797
+        }
+
+
+    </style>
+
+{% endblock %}
+
 {% block breadcrumb_items %}
     <li class="breadcrumb-item active" aria-current="page">Events</li>
 {% endblock %}
@@ -14,22 +59,13 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-striped sortable">
+                <table id="event_table" class="table">
                     <thead class="thead-dark">
                     <tr>
                         <th>Event Name</th>
-                        <th>Start Date</th>
-                        <th>End Date</th>
-                        <th>Location</th>
-                        <th>Promotor</th>
-                        <th>Event Url</th>
-                        <th>Event Flyer</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr>
-                        <td class="text-center text-muted" colspan="7"><em>[NO RECORD!]</em></td>
-                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -37,13 +73,29 @@
     </div>
 {% endblock content %}
 {% block extra_js %}
+    <script src="{% static 'dj/js/datatables.js' %}"></script>
+    <script src="{% static 'dj/js/moment.js' %}"></script>
+
     <script type="text/javascript">
         $(document).ready(function () {
             let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
-            $.get(eventUrl, function(data, status){
+            $.get(eventUrl, function (data, status) {
                 console.log(data);
+                $.fn.dataTable.ext.errMode = 'none';
+                $('#event_table').DataTable({
+                    data: data.results,
+                    createdRow: function (row, data, dataIndex) {
+                        $(row).html(`
+                            <div class="event-listing">
+                                <span class="event-heading">${data.name}</span>
+                                <span class="event-date">
+                                    ${moment(data.start_date).format("dddd, MMMM Do YYYY")} -
+                                    ${moment(data.end_date).format("dddd, MMMM Do YYYY")}
+                                </span>
+                            </div>`)
+                    }
+                });
             })
         });
-
     </script>
 {% endblock extra_js %}
