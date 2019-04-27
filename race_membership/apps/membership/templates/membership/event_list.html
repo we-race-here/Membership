@@ -5,97 +5,123 @@
 
 
 {% block extra_css %}
-    <link href="{% static 'dj/css/datatables.min.css' %}" rel="stylesheet">
-    <style>
-        .dataTables_wrapper table thead {
-            display: none;
-        }
+  <link href="{% static 'dj/css/datatables.min.css' %}" rel="stylesheet">
+  <style>
+    .dataTables_wrapper table thead {
+      display: none;
+    }
 
-        tr:not(:last-child) > div {
-            margin-bottom: 19px;
-            border-bottom: 1px solid #979797;
-        }
+    .table td{
+      border-top: 0px !important;
+    }
 
-        .event-listing:hover {
-            color: #D60B30
-        }
+    tr:not(:last-child) > td > div {
+      padding-bottom: 19px;
+      border-bottom: 1px solid #979797;
+    }
 
-        .event-listing:hover span {
-            color: #D60B30;
-            transition-duration: .2s;
-            transition-timing-function: ease-in
-        }
+    .event-listing:hover {
+      color: #D60B30
+    }
 
-        .event-listing span {
-            display: block;
-        }
+    .event-listing:hover span {
+      color: #D60B30;
+      transition-duration: .2s;
+      transition-timing-function: ease-in
+    }
 
-        .event-listing .event-heading {
-            font-size: 18px;
-            font-weight: 700;
-            color: #031E41
-        }
+    .event-listing span {
+      display: block;
+    }
 
-        .event-listing .event-date,
-        .event-listing .event-info,
-        .event-listing .event-location {
-            font-size: 14px;
-            color: #979797
-        }
+    .event-listing .event-heading {
+      font-size: 18px;
+      font-weight: 700;
+      color: #031E41
+    }
+
+    .event-listing .event-date,
+    .event-listing .event-info,
+    .event-listing .event-location {
+      font-size: 14px;
+      color: #979797
+    }
 
 
-    </style>
+  </style>
 
 {% endblock %}
 
 {% block breadcrumb_items %}
-    <li class="breadcrumb-item active" aria-current="page">Events</li>
+  <li class="breadcrumb-item active" aria-current="page">Events</li>
 {% endblock %}
 
 {% block content %}
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">Event List</h4>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table id="event_table" class="table">
-                    <thead class="thead-dark">
-                    <tr>
-                        <th>Event Name</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
-            </div>
-        </div>
+  <div class="card">
+    <div class="card-header">
+      <h4 class="mb-0">Event List</h4>
     </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table id="event_table" class="table">
+          <thead class="thead-dark">
+          <tr>
+            <th>Event Name</th>
+          </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 {% endblock content %}
 {% block extra_js %}
-    <script src="{% static 'dj/js/datatables.js' %}"></script>
-    <script src="{% static 'dj/js/moment.js' %}"></script>
+  <script src="{% static 'dj/js/datatables.js' %}"></script>
+  <script src="{% static 'dj/js/moment.js' %}"></script>
 
-    <script type="text/javascript">
-        $(document).ready(function () {
-            let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
-            $.get(eventUrl, function (data, status) {
-                console.log(data);
-                $.fn.dataTable.ext.errMode = 'none';
-                $('#event_table').DataTable({
-                    data: data.results,
-                    createdRow: function (row, data, dataIndex) {
-                        $(row).html(`
-                            <div class="event-listing">
-                                <span class="event-heading">${data.name}</span>
-                                <span class="event-date">
-                                    ${moment(data.start_date).format("dddd, MMMM Do YYYY")} -
-                                    ${moment(data.end_date).format("dddd, MMMM Do YYYY")}
-                                </span>
-                            </div>`)
-                    }
-                });
-            })
-        });
-    </script>
+  <script type="text/javascript">
+    $(document).ready(function () {
+      let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
+      $('#event_table').DataTable({
+        ajax: {
+          url: eventUrl,
+          dataSrc: "results"
+        },
+        columnDefs: [{
+          targets: 0,
+          data: null, // Use the full data source object for the renderer's source
+          render: function (data, type, row, meta) {
+            return `<div class="event-listing">
+                        <span class="event-heading">${data.name}</span>
+                        <span class="event-date">
+                            ${moment(data.start_date).format("dddd, MMMM Do YYYY")} -
+                            ${moment(data.end_date).format("dddd, MMMM Do YYYY")}
+                        </span>
+                    </div>`
+
+          }
+        }]
+      });
+      /*
+      $.get(eventUrl, function (data, status) {
+          console.log(data);
+          $.fn.dataTable.ext.errMode = 'none';
+          $('#event_table').DataTable({
+              data: data.results,
+              createdRow: function (row, data, dataIndex) {
+                  $(row).html(`
+                      <div class="event-listing">
+                          <span class="event-heading">${data.name}</span>
+                          <span class="event-date">
+                              ${moment(data.start_date).format("dddd, MMMM Do YYYY")} -
+                              ${moment(data.end_date).format("dddd, MMMM Do YYYY")}
+                          </span>
+                      </div>`)
+              }
+          });
+      })
+      */
+    });
+  </script>
 {% endblock extra_js %}
