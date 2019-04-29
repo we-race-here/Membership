@@ -58,6 +58,10 @@
       padding-top: 0.5rem !important;
       padding-bottom: 0.5rem !important;
     }
+
+    .pagination {
+      display: inline-flex;
+    }
   </style>
 
 {% endblock %}
@@ -112,17 +116,17 @@
       <div class="container">
         <div class="row mt-3">
           <div class="col-md-12 text-right">
-            <input id="chkToggleMap" type="checkbox" checked data-toggle="toggle">
+            <input id="toggle_map" type="checkbox" checked data-toggle="toggle">
           </div>
         </div>
 
         <div class="row mt-3">
-          <div class="col-md-6" id="cntEvents">
+          <div class="col-md-6" id="events_container">
             <input type="text" class="form-control" id="search_input" placeholder="Search..."/>
             <div class="row" id="event_table"></div>
           </div>
-          <div class="col-md-6" id="imgMap">
-            <img id="imgMap" src="{% static '/dj/images/World_map_-_low_resolution.svg' %}" class="img-fluid">
+          <div class="col-md-6" id="events_map">
+            <img id="events_map" src="{% static '/dj/images/World_map_-_low_resolution.svg' %}" class="img-fluid">
           </div>
         </div>
         <div class="paging-container" id="table_paging"></div>
@@ -139,20 +143,30 @@
   <script src="{% static 'dj/js/tempusdominus-bootstrap-4.min.js' %}"></script>
 
   <script type="text/javascript">
-      function showEvents(events) {
-          const eventCount = events.length;
-          window.tp = new Pagination('#table_paging', {itemsCount: eventCount, currentPage: 1, pageSize: 1});
-          $.each(events, function (index, event) {
-              event.start_date = moment(event.start_date).format("dddd, MMMM Do YYYY");
-              event.end_date = moment(event.end_date).format("dddd, MMMM Do YYYY");
-              $('#event_table').append("<div class='col-md-12 event-cell event-listing bottom_bordered mt-3'>");
-              $('.event-cell:last').append("<div class='row'><div class='col-md-12 event-title'>"
-                  + event.name + "</div></div>");
-              $('.event-cell:last').append("<div class='row'><div class='col-md-12 event_date'><span id='from_date'>"
-                  + event.start_date + '</span>&nbsp-&nbsp<span id=\'to_date\'>' + event.end_date + "</span></div></div>");
-              $('.event-cell:last').append("<div class='row'><div class='col-md-12 event_location'>"
-                  + event.location + "</div></div>");
-              $('.event-cell:last').append("</div>");
+      function showEvents(events, page_size = 1, page_index = 1) {
+          // Fill event page
+          let start = page_size * (page_index - 1);
+          let end = start + page_size;
+          $('#event_table').empty();
+          $(events).each(function (index) {
+              if (index >= start && index < end) {
+                  let start_date = moment(this["start_date"]).format("dddd, MMMM Do YYYY");
+                  let end_date = moment(this["end_date"]).format("dddd, MMMM Do YYYY");
+                  // Add event div
+                  $('#event_table').append("<div class='col-md-12 eventCell event-listing eventRow bottom-bordered mt-3'>");
+                  let eventDiv = $('.eventCell:last');
+                  // Add event name
+                  eventDiv.append("<div class='row'><div class='col-md-12 eventTitle'>"
+                      + this["name"] + "</div></div>");
+                  // Add event start/end date
+                  eventDiv.append("<div class='row'><div class='col-md-12 event-date'><span id='fromDate'>"
+                      + start_date + '</span>&nbsp-&nbsp<span id=\'toDate\'>'
+                      + end_date + "</span></div></div>");
+                  // Add event location
+                  eventDiv.append("<div class='row'><div class='col-md-12 eventLocation'>"
+                      + this["location"] + "</div></div>");
+                  $('.eventRow:last').append("</div>");
+              }
           })
       }
 
@@ -161,15 +175,51 @@
           return $.get(eventUrl, params);
       }
 
+      function initPagination(events) {
+          new Pagination('#table_paging', {
+              itemsCount: events.length,
+              currentPage: 1,
+              pageRange: [1, 10, 20, 30, -1],
+              pageSize: 1,
+              onPageChange: function (paging) {
+                  showEvents(events, paging.pageSize, paging.currentPage);
+              },
+              onPageSizeChange: function (paging) {
+                  paging.currentPage = 1;
+                  showEvents(events, paging.pageSize, paging.currentPage);
+              }
+          });
+      }
+
       $(document).ready(function () {
           dateTimePickerWidget('from_date', {format: 'YYYY-MM-DD'});
           dateTimePickerWidget('to_date', {format: 'YYYY-MM-DD'});
 
           getEvents({'page_size': '0'})
               .done(function (data) {
-                  showEvents(data.results);
+                  initPagination(data.results);
               });
 
+          $('#toggle_map').change(function () {
+              let mapState = ($(this).prop('checked'))
+              let eventsContainer = $('#events_container');
+              let eventRows = $('.eventRow');
+              if (mapState === true) {
+                  eventsContainer.removeClass('col-md-12');
+                  eventsContainer.addClass('col-md-6');
+                  eventRows.removeClass('col-md-6');
+                  eventRows.addClass('col-md-12');
+                  $('#events_map').slideDown();
+              } else {
+                  $('#events_map').slideUp(function () {
+                          eventsContainer.removeClass('col-md-6');
+                          eventsContainer.addClass('col-md-12');
+                          eventRows.removeClass('col-md-12');
+                          eventRows.addClass('col-md-6');
+                      }
+                  );
+              }
+          });
 
           // On Search event by name
           let previousTimeout = undefined;
@@ -182,7 +232,7 @@
                   const searchValue = $("#search_input").val();
                   getEvents({'name': searchValue})
                       .done(function (data) {
-                          showEvents(data);
+                          initPagination(data.results);
                       })
               }, 1000);
           });
@@ -193,10 +243,12 @@
               const toDate = $("#to_date").val();
               getEvents({'start_date_min': fromDate, 'end_date_max': toDate})
                   .done(function (data) {
-                      showEvents(data);
+                      initPagination(data.results);
                   });
 
           });
-      })
+      });
+
   </script>
+
 {% endblock extra_js %}

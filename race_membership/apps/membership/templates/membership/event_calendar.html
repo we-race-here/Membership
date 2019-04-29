@@ -1,0 +1,62 @@
+{% extends "membership/base.html" %}
+{% load staticfiles %}
+{% load bootstrap4 %}
+{% load util_tags %}
+{% load static %}
+
+{% block extra_css %}
+  <link href="{% static 'dj/css/full-calendar.css' %}" rel='stylesheet'/>
+  <link href="{% static 'dj/css/full-calendar-daygrid.css' %}" rel='stylesheet'/>
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
+      font-size: 14px;
+    }
+
+
+    main div.container{
+      margin:0 auto;
+      width: 90%;
+    }
+  </style>
+
+{% endblock extra_css %}
+
+
+{% block content %}
+  <div id='calendar'></div>
+{% endblock content %}
+
+{% block extra_js %}
+  <script src="{% static 'dj/js/full-calendar-core.js' %}"></script>
+  <script src="{% static 'dj/js/full-calendar-daygrid.js' %}"></script>
+
+  <script>
+
+      function getEvents(params) {
+          let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
+          return $.get(eventUrl, params);
+      }
+
+      let events = [];
+      $(document).ready(function () {
+          getEvents({'page_size': '0'})
+              .done(function (data) {
+                  $(data.results).each(function (index, event) {
+                      events.push({"title": (event.name), "start": (event.start_date), "end": (event.end_date)});
+                  });
+                  let calendar = new FullCalendar.Calendar(calendarEl, {
+                      plugins: ['dayGrid'],
+                      timeZone: 'UTC',
+                      defaultView: 'dayGridMonth',
+                      events: events
+                  });
+                  calendar.render();
+              });
+          let calendarEl = document.getElementById('calendar');
+      });
+  </script>
+{% endblock extra_js %}

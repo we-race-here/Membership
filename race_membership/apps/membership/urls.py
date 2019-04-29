@@ -2,7 +2,7 @@ from django.urls import re_path
 from .views import (
     IndexView, LoginView, LogoutView, ProfileBasicInfoView, ChangePasswordView, SignUpView,
     ActivationSignUpView, ForgotPasswordView, PasswordRecoveryView, ProfileRacerView, ProfilePromotorStaffView,
-    UiPanelView, EventListView)
+    UiPanelView, EventListView, EventCalendarView)
 
 app_name = 'membership'
 
@@ -20,5 +20,6 @@ urlpatterns = [
     re_path(r'^profile-racer/$', ProfileRacerView.as_view(), name="profile-racer"),
     re_path(r'^profile-promotor-staff/$', ProfilePromotorStaffView.as_view(), name="profile-promotor-staff"),
     re_path(r'^event-list/$', EventListView.as_view(), name="event-list"),
+    re_path(r'^event-calendar/$', EventCalendarView.as_view(), name="event-calendar"),
 
 ]

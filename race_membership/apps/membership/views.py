@@ -305,3 +305,7 @@ class ChangePasswordView(PermissionRequiredMixin, PasswordChangeView):
 
 class EventListView(TemplateView):
     template_name = 'membership/event_list.html'
+
+
+class EventCalendarView(TemplateView):
+    template_name = 'membership/event_calendar.html'
