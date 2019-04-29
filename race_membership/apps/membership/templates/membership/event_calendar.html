@@ -7,32 +7,42 @@
 {% block extra_css %}
   <link href="{% static 'dj/css/full-calendar.css' %}" rel='stylesheet'/>
   <link href="{% static 'dj/css/full-calendar-daygrid.css' %}" rel='stylesheet'/>
+  <link href="{% static 'dj/css/full-calendar-list.css' %}" rel='stylesheet'/>
+  <link href="{% static 'dj/css/full-calendar-time.css' %}" rel='stylesheet'/>
 
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
-      font-family: Arial, Helvetica Neue, Helvetica, sans-serif;
-      font-size: 14px;
-    }
 
-
-    main div.container{
-      margin:0 auto;
-      width: 90%;
-    }
   </style>
 
 {% endblock extra_css %}
 
+{% block breadcrumb_items %}
+  <li class="breadcrumb-item active" aria-current="page">Events Calendar</li>
+{% endblock %}
+
 
 {% block content %}
-  <div id='calendar'></div>
+  <div class="card">
+    <div class="card-header">
+      <h4 class="mb-0">Event Calendar</h4>
+    </div>
+    <div class="card-body p-0">
+      <div class="container">
+        <div class="row mt-3">
+          <div class="col">
+            <div id='calendar'></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock content %}
 
 {% block extra_js %}
   <script src="{% static 'dj/js/full-calendar-core.js' %}"></script>
   <script src="{% static 'dj/js/full-calendar-daygrid.js' %}"></script>
+  <script src="{% static 'dj/js/full-calendar-list.js' %}"></script>
+  <script src="{% static 'dj/js/full-calendar-time.js' %}"></script>
 
   <script>
 
@@ -49,9 +59,15 @@
                       events.push({"title": (event.name), "start": (event.start_date), "end": (event.end_date)});
                   });
                   let calendar = new FullCalendar.Calendar(calendarEl, {
-                      plugins: ['dayGrid'],
+                      plugins:  [ 'dayGrid', 'timeGrid', 'list'],
                       timeZone: 'UTC',
                       defaultView: 'dayGridMonth',
+                      header: {
+                          left: 'prev,next today',
+                          center: 'title',
+                          right: 'dayGridMonth,timeGridWeek,listWeek'
+                      },
+                      eventLimit: true,
                       events: events
                   });
                   calendar.render();
