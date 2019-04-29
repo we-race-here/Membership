@@ -176,11 +176,11 @@
       }
 
       function initPagination(events) {
-          new Pagination('#table_paging', {
+          Pagination('#table_paging', {
               itemsCount: events.length,
               currentPage: 1,
-              pageRange: [1, 10, 20, 30, -1],
-              pageSize: 1,
+              pageRange: [10, 20, 30, -1],
+              pageSize: 10,
               onPageChange: function (paging) {
                   showEvents(events, paging.pageSize, paging.currentPage);
               },
@@ -191,63 +191,71 @@
           });
       }
 
-      $(document).ready(function () {
-          dateTimePickerWidget('from_date', {format: 'YYYY-MM-DD'});
-          dateTimePickerWidget('to_date', {format: 'YYYY-MM-DD'});
+      $(document).ready(
+          (function () {
+              let events = [];
+              dateTimePickerWidget('from_date', {format: 'YYYY-MM-DD'});
+              dateTimePickerWidget('to_date', {format: 'YYYY-MM-DD'});
 
-          getEvents({'page_size': '0'})
-              .done(function (data) {
-                  initPagination(data.results);
-              });
-
-          $('#toggle_map').change(function () {
-              let mapState = ($(this).prop('checked'))
-              let eventsContainer = $('#events_container');
-              let eventRows = $('.eventRow');
-              if (mapState === true) {
-                  eventsContainer.removeClass('col-md-12');
-                  eventsContainer.addClass('col-md-6');
-                  eventRows.removeClass('col-md-6');
-                  eventRows.addClass('col-md-12');
-                  $('#events_map').slideDown();
-              } else {
-                  $('#events_map').slideUp(function () {
-                          eventsContainer.removeClass('col-md-6');
-                          eventsContainer.addClass('col-md-12');
-                          eventRows.removeClass('col-md-12');
-                          eventRows.addClass('col-md-6');
-                      }
-                  );
-              }
-          });
-
-          // On Search event by name
-          let previousTimeout = undefined;
-          $("#search_input").on("keyup paste", function () {
-              // Debounce search request
-              if (previousTimeout) {
-                  clearTimeout(previousTimeout);
-              }
-              previousTimeout = setTimeout(function () {
-                  const searchValue = $("#search_input").val();
-                  getEvents({'name': searchValue})
-                      .done(function (data) {
-                          initPagination(data.results);
-                      })
-              }, 1000);
-          });
-
-          // On Search event by from/to date
-          $("#search_date_btn").on("click", function () {
-              const fromDate = $("#from_date").val();
-              const toDate = $("#to_date").val();
-              getEvents({'start_date_min': fromDate, 'end_date_max': toDate})
+              getEvents({'page_size': '0'})
                   .done(function (data) {
-                      initPagination(data.results);
+                      events = data.results;
+                      initPagination(events);
                   });
 
-          });
-      });
+              $('#toggle_map').change(function () {
+                  let mapState = ($(this).prop('checked'))
+                  let eventsContainer = $('#events_container');
+                  let eventRows = $('.eventRow');
+                  if (mapState === true) {
+                      eventsContainer.removeClass('col-md-12');
+                      eventsContainer.addClass('col-md-6');
+                      eventRows.removeClass('col-md-6');
+                      eventRows.addClass('col-md-12');
+                      $('#events_map').slideDown();
+                  } else {
+                      $('#events_map').slideUp(function () {
+                              eventsContainer.removeClass('col-md-6');
+                              eventsContainer.addClass('col-md-12');
+                              eventRows.removeClass('col-md-12');
+                              eventRows.addClass('col-md-6');
+                          }
+                      );
+                  }
+              });
+
+              // On Search event by name
+              let previousTimeout = undefined;
+              $("#search_input").on("keyup paste", function () {
+                  // Debounce search request
+                  if (previousTimeout) {
+                      clearTimeout(previousTimeout);
+                  }
+                  previousTimeout = setTimeout(function () {
+                      const searchValue = $("#search_input").val();
+                      let filteredEvents = events.filter(function (event) {
+                          if (!searchValue || searchValue.length === 0) {
+                              return true
+                          }
+                          return event.name.indexOf(searchValue) >= 0
+                      });
+                      initPagination(filteredEvents);
+                  }, 500);
+              });
+
+              // On Search event by from/to date
+              $("#search_date_btn").on("click", function () {
+                  const fromDate = $("#from_date").val();
+                  const toDate = $("#to_date").val();
+                  getEvents({'start_date_min': fromDate, 'end_date_max': toDate})
+                      .done(function (data) {
+                          events = data.results;
+                          initPagination(events);
+                      });
+
+              });
+          }())
+      );
 
   </script>
 
