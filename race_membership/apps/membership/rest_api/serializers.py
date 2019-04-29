@@ -90,16 +90,18 @@ class UserProfileSerializer(DynamicFieldsSerializerMixin, serializers.ModelSeria
     @transaction.atomic()
     def update(self, instance, validated_data):
         racer_data = validated_data.pop('racer', {})
+        try:
+            racer_object = instance.racer
+        except Racer.DoesNotExist:
+            racer_object = None
         if racer_data:
-            try:
-                racer_object = instance.racer
-            except Racer.DoesNotExist:
-                racer_object = None
             if not racer_object:
                 racer_object = Racer(user=instance)
             for k, v in racer_data.items():
                 setattr(racer_object, k, v)
             racer_object.save()
+        elif (not racer_object) and validated_data.get('is_racer'):
+            raise serializers.ValidationError('Cannot enable racer profile before complete required fields!')
 
         staff_promotor_data = validated_data.pop('staff_promotor', {})
         if staff_promotor_data:
