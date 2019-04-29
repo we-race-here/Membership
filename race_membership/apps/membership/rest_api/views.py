@@ -145,7 +145,7 @@ class ProfileView(LoggingMixin, viewsets.ViewSet):
         return Response(self.serializer_class(request.user, context={'request': request}).data)
 
     def put(self, request, *args, **kwargs):
-        serializer = self.serializer_class(instance=request.user, data=request.data)
+        serializer = self.serializer_class(instance=request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response(self.serializer_class(user, context={'request': request}).data)

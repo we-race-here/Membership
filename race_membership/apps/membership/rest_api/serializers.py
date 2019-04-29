@@ -75,6 +75,8 @@ class UserSessionSerializer(DynamicFieldsSerializerMixin, serializers.ModelSeria
 
 
 class UserProfileSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+    first_name = serializers.CharField(required=True, trim_whitespace=True)
+    last_name = serializers.CharField(required=True, trim_whitespace=True)
     avatar = Base64ImageField(required=False, allow_null=True)
     racer = RacerProfileSerializer(required=False, allow_null=True)
     staff_promotor = StaffPromotorProfileSerializer(required=False, allow_null=True)
@@ -110,10 +112,6 @@ class UserProfileSerializer(DynamicFieldsSerializerMixin, serializers.ModelSeria
             for k, v in staff_promotor_data.items():
                 setattr(staff_promotor_object, k, v)
             staff_promotor_object.save()
-        if not validated_data.get('first_name') and not instance.first_name:
-            raise serializers.ValidationError({'first_name': 'this field is required'})
-        if not validated_data.get('last_name') and not instance.last_name:
-            raise serializers.ValidationError({'last_name': 'this field is required'})
 
         return super(UserProfileSerializer, self).update(instance, validated_data)
 
