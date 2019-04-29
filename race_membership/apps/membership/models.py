@@ -118,7 +118,7 @@ class Racer(models.Model):
         return super().save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.user)
+        return '{} {}'.format(self.first_name, self.last_name)
 
 
 class StaffPromotor(models.Model):
