@@ -110,11 +110,10 @@ class Racer(models.Model):
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = self.make_uid_auto()
-        if self.user_id:
-            if not self.first_name:
-                self.first_name = self.user.first_name
-            if not self.last_name:
-                self.last_name = self.user.last_name
+        if not self.first_name:
+            self.first_name = self.user and self.user.first_name
+        if not self.last_name:
+            self.last_name = self.user and self.user.last_name
         return super().save(*args, **kwargs)
 
     def __str__(self):
