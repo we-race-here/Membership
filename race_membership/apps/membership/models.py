@@ -162,8 +162,8 @@ class Race(models.Model):
     name = models.CharField(max_length=128)
     start_date = models.DateField()
     start_time = models.TimeField(null=True, blank=True)
-    types = models.ManyToManyField(RaceType)
-    category = models.ForeignKey('RaceCategory', on_delete=models.SET_NULL, null=True, related_name='race')
+    types = models.ManyToManyField(RaceType, blank=True)
+    category = models.ForeignKey('RaceCategory', on_delete=models.SET_NULL, null=True, blank=True, related_name='race')
     event = models.ForeignKey('Event', on_delete=models.CASCADE, related_name='race')
 
     def __str__(self):
