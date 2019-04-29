@@ -4,7 +4,7 @@ from django.core.exceptions import ValidationError
 from django.forms.widgets import PasswordInput, TextInput, EmailInput
 from django import forms
 
-from apps.membership.models import Racer, User, StaffPromotor
+from apps.membership.models import User
 
 boolean_toggle_attrs = {
     'data-onstyle': 'success', 'data-offstyle': 'danger', 'data-toggle': 'toggle', 'data-on': 'Enabled',
@@ -136,55 +136,3 @@ class PasswordRecoveryForm(forms.Form):
         if commit:
             self.user.save()
         return self.user
-
-
-class ProfileBasicInfoForm(forms.ModelForm):
-    """
-    User profile
-    """
-
-    class Meta:
-        model = User
-        fields = ['first_name', 'last_name', ]
-
-
-class ProfileRacerForm(forms.ModelForm):
-    enabled = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs=boolean_toggle_attrs), label='')
-    field_order = ['enabled']
-
-    class Meta:
-        model = Racer
-        exclude = ['user', 'uid', 'licenses']
-
-    def __init__(self, user, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-        self.fields['enabled'].initial = self.user.is_racer
-
-    def save(self, commit=True):
-        self.instance.user = self.user
-        if self.cleaned_data['enabled'] != self.user.is_racer:
-            self.user.is_racer = self.cleaned_data['enabled']
-            self.user.save(update_fields=['is_racer'])
-        return super().save(commit=commit)
-
-
-class ProfilePromotorStaffForm(forms.ModelForm):
-    enabled = forms.BooleanField(required=False, widget=forms.CheckboxInput(attrs=boolean_toggle_attrs), label='')
-    field_order = ['enabled']
-
-    class Meta:
-        model = StaffPromotor
-        exclude = ['user', 'promotors']
-
-    def __init__(self, user, *args, **kwargs):
-        self.user = user
-        super().__init__(*args, **kwargs)
-        self.fields['enabled'].initial = self.user.is_staff_promotor
-
-    def save(self, commit=True):
-        self.instance.user = self.user
-        if self.cleaned_data['enabled'] != self.user.is_staff_promotor:
-            self.user.is_staff_promotor = self.cleaned_data['enabled']
-            self.user.save(update_fields=['is_staff_promotor'])
-        return super().save(commit=commit)

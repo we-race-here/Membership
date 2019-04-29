@@ -55,14 +55,14 @@ class RacerProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Racer
         fields = '__all__'
-        read_only_fields = ('uid', 'user', 'licenses')
+        read_only_fields = ('uid', 'user', 'first_name', 'last_name', 'licenses')
 
 
 class StaffPromotorProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = StaffPromotor
         fields = '__all__'
-        read_only_fields = ('user', 'promotors')
+        read_only_fields = ('user', 'promotors', 'first_name', 'last_name')
 
 
 class UserSessionSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):

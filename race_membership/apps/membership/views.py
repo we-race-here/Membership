@@ -1,5 +1,4 @@
 from django.conf import settings
-from django.contrib.auth.views import PasswordChangeView
 from django.core import signing
 from django.core.mail import send_mail
 from django.shortcuts import render, redirect
@@ -12,9 +11,10 @@ from django.contrib.auth import login as auth_login
 from django.contrib.auth import logout as auth_logout
 from django.views.generic import UpdateView, TemplateView
 
-from apps.membership.forms import (ProfileBasicInfoForm, LoginForm, SignUpForm, ActivationSignUpForm,
-                                   ForgotPasswordForm, PasswordRecoveryForm, ProfileRacerForm, ProfilePromotorStaffForm)
-from apps.membership.models import User, Racer, StaffPromotor, Event
+from apps.membership.forms import (
+    LoginForm, SignUpForm, ActivationSignUpForm, ForgotPasswordForm, PasswordRecoveryForm
+)
+from apps.membership.models import User, StaffPromotor
 from race_membership.helpers.shortcuts import unsign
 from race_membership.helpers.utils import PermissionRequiredMixin, success_message, send_form_errors, ex_reverse, \
     error_message
@@ -229,78 +229,6 @@ class LogoutView(View):
         auth_logout(request)
         next_url = request.headers.get('Referer') or 'membership:index'
         return redirect(next_url)
-
-
-class ProfileBasicInfoView(PermissionRequiredMixin, UpdateView):
-    permission_required = ()
-    form_class = ProfileBasicInfoForm
-    template_name = 'membership/profile/basic_info.html'
-    success_url = reverse_lazy('membership:profile-basic-info')
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def form_valid(self, form):
-        result = super().form_valid(form)
-        success_message('Basic Profile updated successfully.', self.request)
-        return result
-
-
-class ProfileRacerView(PermissionRequiredMixin, UpdateView):
-    permission_required = ()
-    form_class = ProfileRacerForm
-    template_name = 'membership/profile/racer.html'
-    success_url = reverse_lazy('membership:profile-racer')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def get_object(self, queryset=None):
-        try:
-            return self.request.user.racer
-        except Racer.DoesNotExist:
-            return None
-
-    def form_valid(self, form):
-        result = super().form_valid(form)
-        success_message('Racer Profile updated successfully.', self.request)
-        return result
-
-
-class ProfilePromotorStaffView(PermissionRequiredMixin, UpdateView):
-    permission_required = ()
-    form_class = ProfilePromotorStaffForm
-    template_name = 'membership/profile/promotor_staff.html'
-    success_url = reverse_lazy('membership:profile-promotor-staff')
-
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-    def get_object(self, queryset=None):
-        try:
-            return self.request.user.staff_promotor
-        except StaffPromotor.DoesNotExist:
-            return None
-
-    def form_valid(self, form):
-        result = super().form_valid(form)
-        success_message('Staff Promotor Profile updated successfully.', self.request)
-        return result
-
-
-class ChangePasswordView(PermissionRequiredMixin, PasswordChangeView):
-    permission_required = ()
-    success_url = reverse_lazy('membership:change-password')
-    template_name = 'membership/change_password.html'
-
-    def form_valid(self, form):
-        result = super(ChangePasswordView, self).form_valid(form)
-        success_message('Password changed successfully.', self.request)
-        return result
 
 
 class EventListView(TemplateView):

@@ -71,7 +71,9 @@ class User(AbstractUser):
 
 class Racer(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='racer')
-    uid = models.CharField('Racer ID', max_length=16, unique=True)
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128)
+    uid = models.CharField('Racer ID', max_length=16, unique=True, editable=False)
     birth_date = models.DateField()
     phone = PhoneNumberField(max_length=50, null=True, blank=True)
     street_address = models.CharField(max_length=256, blank=True, null=True)
@@ -108,6 +110,11 @@ class Racer(models.Model):
     def save(self, *args, **kwargs):
         if not self.uid:
             self.uid = self.make_uid_auto()
+        if self.user_id:
+            if not self.first_name:
+                self.first_name = self.user.first_name
+            if not self.last_name:
+                self.last_name = self.user.last_name
         return super().save(*args, **kwargs)
 
     def __str__(self):
@@ -115,7 +122,7 @@ class Racer(models.Model):
 
 
 class StaffPromotor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='staff_promotor')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='staff_promotor')
     promotors = models.ManyToManyField('Promotor')
 
     def __str__(self):
