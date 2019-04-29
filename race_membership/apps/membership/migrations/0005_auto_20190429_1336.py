@@ -19,6 +19,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name='race',
             name='types',
-            field=models.ManyToManyField(blank=True, null=True, to='membership.RaceType'),
+            field=models.ManyToManyField(blank=True, to='membership.RaceType'),
         ),
     ]
