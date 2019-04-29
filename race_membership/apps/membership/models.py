@@ -185,7 +185,7 @@ class RaceResult(models.Model):
     place = models.PositiveIntegerField()
 
     def __str__(self):
-        return str(self.place)
+        return '{}- {}'.format(self.place, self.racer)
 
 
 class Event(models.Model):
