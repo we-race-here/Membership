@@ -70,7 +70,7 @@ class User(AbstractUser):
 
 
 class Racer(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='racer')
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='racer')
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128)
     uid = models.CharField('Racer ID', max_length=16, unique=True, editable=False)
