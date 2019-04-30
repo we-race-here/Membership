@@ -108,7 +108,7 @@ var Pagination = function (el, options) {
 	};
 
 	getRenderedPageRange = function () {
-		var result = '<select class="page-range">';
+		var result = '<select class="page-range form-control">';
 
 		$.each(pageRange, function (i, p) {
 			var selected = pageSize === p ? 'selected="selected"' : '';
@@ -122,15 +122,15 @@ var Pagination = function (el, options) {
 		var pageNumbers = getPageNumbersToDisplay(),
 			result;
 
-		result = '<li class="page-item" data-page="' + FIRST_PAGE_NUMBER + '"><a class="page-link" href="javascipt:void(0)"><span aria-hidden="true">' + firstPageLabel + '</span></a></li>' +
-				 '<li class="page-item" data-page="' + PREVIOUS_PAGE_NUMBER + '"><a class="page-link" href="javascipt:void(0)"><span aria-hidden="true">' + previousPageLabel + '</span></a></li>';
+		result = '<li class="page-item" data-page="' + FIRST_PAGE_NUMBER + '"><a class="page-link"><span aria-hidden="true">' + firstPageLabel + '</span></a></li>' +
+				 '<li class="page-item" data-page="' + PREVIOUS_PAGE_NUMBER + '"><a class="page-link"><span aria-hidden="true">' + previousPageLabel + '</span></a></li>';
 
 		$.each(pageNumbers, function (i, p) {
-			result += '<li class="page-item" data-page="' + p + '" ' + (p === currentPage ? 'class="active"' : '') + '><a class="page-link" href="javascipt:void(0)">' + p + '</a></li>';
+			result += '<li class="page-item" data-page="' + p + '" ' + (p === currentPage ? 'class="active"' : '') + '><a class="page-link">' + p + '</a></li>';
 		});
 
-		result += '<li class="page-item" data-page="' + NEXT_PAGE_NUMBER + '"><a class="page-link" href="javascipt:void(0)"><span aria-hidden="true">' + nextPageLabel + '</span></a></li>' +
-				  '<li class="page-item" data-page="' + LAST_PAGE_NUMBER + '"><a class="page-link" href="javascipt:void(0)"><span aria-hidden="true">' + lastPageLabel + '</span></a></li>';
+		result += '<li class="page-item" data-page="' + NEXT_PAGE_NUMBER + '"><a class="page-link"><span aria-hidden="true">' + nextPageLabel + '</span></a></li>' +
+				  '<li class="page-item" data-page="' + LAST_PAGE_NUMBER + '"><a class="page-link"><span aria-hidden="true">' + lastPageLabel + '</span></a></li>';
 
 		return result;
 	};
