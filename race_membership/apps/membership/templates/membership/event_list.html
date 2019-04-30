@@ -93,7 +93,7 @@
         <div class="col-3 text-left">
           <div class="form-group">
             <div class="input-group date" id="from_date" data-target-input="nearest">
-              <input type="text" class="form-control datetimepicker-input" data-target="#from_date"/>
+              <input type="text" id="from_date_input" class="form-control datetimepicker-input" data-target="#from_date"/>
               <div class="input-group-append" data-target="#from_date" data-toggle="datetimepicker">
                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
               </div>
@@ -105,7 +105,7 @@
         </div>
         <div class="col-3 text-left">
           <div class="input-group date" id="to_date" data-target-input="nearest">
-              <input type="text" class="form-control datetimepicker-input" data-target="#to_date"/>
+              <input type="text"id="to_date_input"  class="form-control datetimepicker-input" data-target="#to_date"/>
               <div class="input-group-append" data-target="#to_date" data-toggle="datetimepicker">
                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
               </div>
@@ -254,8 +254,8 @@
 
               // On Search event by from/to date
               $("#search_date_btn").on("click", function () {
-                  const fromDate = $("#from_date").val();
-                  const toDate = $("#to_date").val();
+                  const fromDate = $("#from_date_input").val();
+                  const toDate = $("#to_date_input").val();
                   getEvents({'start_date_min': fromDate, 'end_date_max': toDate})
                       .done(function (data) {
                           events = data.results;
