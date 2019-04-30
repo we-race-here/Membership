@@ -6,8 +6,8 @@
 
 
 {% block extra_css %}
-  <link href="{% static 'dj/css/datatables.min.css' %}" rel="stylesheet">
   <link href="{% static 'dj/css/bootstrap4-toggle.css' %}" rel="stylesheet">
+  <link href="{% static 'dj/css/tempusdominus-bootstrap-4.min.css' %}" rel="stylesheet">
   <style>
 
     .event-listing:hover {
@@ -62,6 +62,18 @@
     .pagination {
       display: inline-flex;
     }
+
+    .page-range {
+      display: inline;
+      width: auto;
+      margin-left: 10px;
+    }
+
+    #event_table {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
   </style>
 
 {% endblock %}
@@ -75,42 +87,34 @@
     <div class="card-header">
       <h4 class="mb-0">Event List</h4>
       <div class="row mt-3">
-        <div class="col-md-3 text-right">
-          From Date :
+        <div class="col-1 text-right">
+          <span style="vertical-align: sub">From:</span>
         </div>
-        <div class="col-md-3 text-left">
-          <div class="input-group">
-            <input type="text"
-                   placeholder="From date"
-                   title="" required=""
-                   id="from_date"/>
-            <div class="input-group-append">
-              <span class="input-group-text"><span class="fa fa-calendar"></span></span>
+        <div class="col-3 text-left">
+          <div class="form-group">
+            <div class="input-group date" id="from_date" data-target-input="nearest">
+              <input type="text" class="form-control datetimepicker-input" data-target="#from_date"/>
+              <div class="input-group-append" data-target="#from_date" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+              </div>
             </div>
           </div>
         </div>
-        <div class="col-md-3 text-right">
-          To Date :
+        <div class="col-1 text-right">
+          <span style="vertical-align: sub">To:</span>
         </div>
-        <div class="col-md-3 text-left">
-          <div class="input-group">
-            <input type="text"
-                   placeholder="To date"
-                   title="" required=""
-                   id="to_date"/>
-            <div class="input-group-append">
-              <span class="input-group-text"><span class="fa fa-calendar"></span></span>
+        <div class="col-3 text-left">
+          <div class="input-group date" id="to_date" data-target-input="nearest">
+              <input type="text" class="form-control datetimepicker-input" data-target="#to_date"/>
+              <div class="input-group-append" data-target="#to_date" data-toggle="datetimepicker">
+                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+              </div>
             </div>
-          </div>
         </div>
-      </div>
-      <div class="row mt-3">
-        <div class="col-12 text-center">
+        <div class="col-3 text-center">
           <input type="button" class="btn btn-large btn-info" value="Search" id="search_date_btn"/>
         </div>
       </div>
-      <br>
-
     </div>
     <div class="card-body p-0">
       <div class="container">
@@ -129,13 +133,14 @@
             <img id="events_map" src="{% static '/dj/images/World_map_-_low_resolution.svg' %}" class="img-fluid">
           </div>
         </div>
-        <div class="paging-container" id="table_paging"></div>
+        <div class="row mt-3">
+          <div class="paging-container" id="table_paging"></div>
+        </div>
       </div>
     </div>
   </div>
 {% endblock content %}
 {% block extra_js %}
-  <script src="{% static 'dj/js/datatables.js' %}"></script>
   <script src="{% static 'dj/js/moment.js' %}"></script>
   <script src="{% static 'dj/js/utils.js' %}"></script>
   <script src="{% static 'dj/js/pagination.js' %}"></script>
@@ -194,8 +199,12 @@
       $(document).ready(
           (function () {
               let events = [];
-              dateTimePickerWidget('from_date', {format: 'YYYY-MM-DD'});
-              dateTimePickerWidget('to_date', {format: 'YYYY-MM-DD'});
+              $('#from_date').datetimepicker({
+                  format: 'YYYY-MM-DD'
+              });
+              $('#to_date').datetimepicker({
+                  format: 'YYYY-MM-DD'
+              });
 
               getEvents({'page_size': '0'})
                   .done(function (data) {
