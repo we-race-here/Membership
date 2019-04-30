@@ -1,7 +1,7 @@
 import django_filters
 from django_filters import rest_framework as filters
 
-from apps.membership.models import Event
+from apps.membership.models import Event, Race, RaceResult
 
 
 class EventFilter(filters.FilterSet):
@@ -13,3 +13,17 @@ class EventFilter(filters.FilterSet):
     class Meta:
         model = Event
         exclude = ('event_flyer', 'image')
+
+
+class RaceFilter(filters.FilterSet):
+
+    class Meta:
+        model = Race
+        fields = '__all__'
+
+
+class RaceResultFilter(filters.FilterSet):
+
+    class Meta:
+        model = RaceResult
+        fields = '__all__'
