@@ -12,13 +12,14 @@
 {% block content %}
   <div class="card">
     <div class="card-header">
-      <h4 class="mb-0">Race result of {{event.name}} event</h4>
+      <h4 class="mb-0">Race result of {{ event.name }} event</h4>
       <div class="row mt-3">
         <div class="col-md-1">
           <span>Races : </span>
         </div>
         <div class="col-md-4">
           <select class="form-control" id="races">
+            <option value="-1">Select a race...</option>
             {% for race in races %}
               <option value="{{ race.id }}">{{ race.name }}</option>
             {% endfor %}
@@ -31,14 +32,12 @@
 {% block extra_js %}
   <script type="application/javascript">
 
-      function getRaceResults(params) {
-          {#let eventUrl = "{% url 'membership:race-result'  %}";#}
-          {#let race_resultUrl = "http://localhost:8000/api/v1/race_result/" + params;#}
-          {#return $.get(race_resultUrl);#}
+      function getRaceResults(raceId) {
+          let raceResultUrl = "{% url 'membership_rest_api:raceresult-list' 'v1' %}" + `?search=${raceId}`;
+          return $.get(raceResultUrl);
       }
 
       $('#races').on('change', function (e) {
-          debugger;
           const optionSelected = $("option:selected", this);
           const valueSelected = optionSelected[0].value;
           getRaceResults(valueSelected)

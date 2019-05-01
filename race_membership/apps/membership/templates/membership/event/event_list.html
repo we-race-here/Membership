@@ -210,9 +210,7 @@
       }
 
       function goToRaceResult(eventId) {
-          debugger;
-          let raceResultUrl = "{% url 'membership:race-result' 1234 %}".replace(/1234/, eventId);
-          location.href = raceResultUrl;
+          location.href = "{% url 'membership:race-result' 1234 %}".replace(/1234/, eventId);
       }
 
       $(document).ready(
