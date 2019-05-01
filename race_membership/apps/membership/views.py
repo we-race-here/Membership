@@ -14,10 +14,12 @@ from django.views.generic import UpdateView, TemplateView
 from apps.membership.forms import (
     LoginForm, SignUpForm, ActivationSignUpForm, ForgotPasswordForm, PasswordRecoveryForm
 )
-from apps.membership.models import User, StaffPromotor
+from apps.membership.models import User, StaffPromotor, Race, Event
 from race_membership.helpers.shortcuts import unsign
 from race_membership.helpers.utils import PermissionRequiredMixin, success_message, send_form_errors, ex_reverse, \
     error_message
+from rest_framework.generics import get_object_or_404
+
 
 
 class IndexView(View):
@@ -232,8 +234,22 @@ class LogoutView(View):
 
 
 class EventListView(TemplateView):
-    template_name = 'membership/event_list.html'
+    template_name = 'membership/event/event_list.html'
 
 
 class EventCalendarView(TemplateView):
-    template_name = 'membership/event_calendar.html'
+    template_name = 'membership/event/event_calendar.html'
+
+
+class EventCalendarView(View):
+    template_name = 'membership/race/race-result.html'
+    event_id_url_kwarg = 'event_id'
+
+    def get(self, request, *args, **kwargs):
+        if self.event_id_url_kwarg not in kwargs:
+            error_message('Invalid request received!', request)
+            return render(request, self.template_name)
+        event_id = kwargs[self.event_id_url_kwarg]
+        event = get_object_or_404(Event, id=event_id)
+        races = Race.objects.filter(event=event).all()
+        return render(request, self.template_name, {'event': event, 'races': races})

@@ -153,23 +153,36 @@
           let start = page_size * (page_index - 1);
           let end = start + page_size;
           $('#event_table').empty();
-          $(events).each(function (index) {
+          $(events).each(function (index, event) {
               if (index >= start && index < end) {
-                  let start_date = moment(this["start_date"]).format("dddd, MMMM Do YYYY");
-                  let end_date = moment(this["end_date"]).format("dddd, MMMM Do YYYY");
+                  let start_date = moment(event.start_date).format("dddd, MMMM Do YYYY");
+                  let end_date = moment(event.end_date).format("dddd, MMMM Do YYYY");
                   // Add event div
-                  $('#event_table').append("<div class='col-md-12 eventCell event-listing eventRow bottom-bordered mt-3'>");
+                  $('#event_table').append(
+                      `<div
+                          class='col-md-12 eventCell event-listing eventRow bottom-bordered mt-3'
+                          onClick='goToRaceResult(${event.id})'
+                        >`);
                   let eventDiv = $('.eventCell:last');
                   // Add event name
-                  eventDiv.append("<div class='row'><div class='col-md-12 eventTitle'>"
-                      + this["name"] + "</div></div>");
+                  eventDiv.append(`
+                    <div class='row'>
+                      <div class='col-md-12 eventTitle'>${event.name}</div>
+                    </div>`);
                   // Add event start/end date
-                  eventDiv.append("<div class='row'><div class='col-md-12 event-date'><span id='fromDate'>"
-                      + start_date + '</span>&nbsp-&nbsp<span id=\'toDate\'>'
-                      + end_date + "</span></div></div>");
+                  eventDiv.append(`
+                    <div class='row'>
+                      <div class='col-md-12 event-date'>
+                        <span id='fromDate'>${start_date}</span>&nbsp-&nbsp
+                        <span id='toDate'>${end_date}</span>
+                      </div>
+                    </div>`);
                   // Add event location
-                  eventDiv.append("<div class='row'><div class='col-md-12 eventLocation'>"
-                      + this["location"] + "</div></div>");
+                  eventDiv.append(`
+                    <div class='row'>
+                      <div class='col-md-12 eventLocation'>${event.location}
+                      </div>
+                    </div>`);
                   $('.eventRow:last').append("</div>");
               }
           })
@@ -194,6 +207,12 @@
                   showEvents(events, paging.pageSize, paging.currentPage);
               }
           });
+      }
+
+      function goToRaceResult(eventId) {
+          debugger;
+          let raceResultUrl = "{% url 'membership:race-result' 1234 %}".replace(/1234/, eventId);
+          location.href = raceResultUrl;
       }
 
       $(document).ready(

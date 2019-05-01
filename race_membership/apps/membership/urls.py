@@ -17,5 +17,5 @@ urlpatterns = [
     re_path(r'^password-recovery/(?P<sign>.+)/$', PasswordRecoveryView.as_view(), name="password-recovery"),
     re_path(r'^event-list/$', EventListView.as_view(), name="event-list"),
     re_path(r'^event-calendar/$', EventCalendarView.as_view(), name="event-calendar"),
-
+    re_path(r'^race-result/(?P<event_id>\d+)/$', EventCalendarView.as_view(), name="race-result"),
 ]
