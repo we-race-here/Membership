@@ -143,6 +143,12 @@ class EventSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer)
 
 class RaceResultSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
 
+    full_name = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_full_name(race_result):
+        return '{} {}'.format(race_result.racer.first_name, race_result.racer.last_name)
+
     class Meta:
         model = RaceResult
-        fields = '__all__'
+        fields = ('place', 'duration', 'full_name')
