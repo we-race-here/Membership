@@ -4,7 +4,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import Group, Permission
 from django.core import exceptions as django_exceptions
 
-from apps.membership.models import User, Racer, StaffPromotor, Event, Promotor, RaceResult
+from apps.membership.models import User, Racer, StaffPromotor, Event, Promotor, RaceCategory, Race, RaceResult, RaceType
 from race_membership.helpers.utils import DynamicFieldsSerializerMixin, Base64ImageField
 
 
@@ -141,14 +141,56 @@ class EventSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer)
         fields = '__all__'
 
 
+class NestedEventSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+
+    class Meta:
+        model = Event
+        fields = ('id', 'name')
+
+
+class NestedRaceCategorySerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+
+    class Meta:
+        model = RaceCategory
+        fields = ('id', 'name')
+
+
+class NestedRaceTypeSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+
+    class Meta:
+        model = RaceType
+        fields = ('id', 'title')
+
+
+class NestedRaceSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+
+    class Meta:
+        model = Race
+        fields = ('id', 'name')
+
+
+class NestedRacerSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+
+    class Meta:
+        model = Racer
+        fields = ('id', 'first_name', 'last_name')
+
+
+class RaceSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
+    _event = NestedEventSerializer(read_only=True, source='event')
+    _category =  NestedRaceCategorySerializer(read_only=True, source='category')
+    _types =  NestedRaceTypeSerializer(read_only=True, source='types', many=True)
+    duration_seconds = serializers.IntegerField()
+
+    class Meta:
+        model = Race
+        fields = '__all__'
+
+
 class RaceResultSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
-
-    full_name = serializers.SerializerMethodField()
-
-    @staticmethod
-    def get_full_name(race_result):
-        return '{} {}'.format(race_result.racer.first_name, race_result.racer.last_name)
+    _racer = NestedRacerSerializer(read_only=True, source='racer')
+    _race = NestedRaceSerializer(read_only=True, source='race')
 
     class Meta:
         model = RaceResult
-        fields = ('place', 'duration', 'full_name')
+        fields = '__all__'

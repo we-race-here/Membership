@@ -8,13 +8,16 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
 from rest_framework.parsers import FileUploadParser
+from rest_framework.permissions import DjangoModelPermissionsOrAnonReadOnly
 from rest_framework.response import Response
 from reversion.models import Version
 
-from apps.membership.models import Event, RaceResult
-from apps.membership.rest_api.filters import EventFilter
-from apps.membership.rest_api.serializers import SessionSerializer, UserSessionSerializer, UserProfileSerializer, \
-    SetPasswordSerializer, EventSerializer, RaceResultSerializer
+from apps.membership.models import Event, Race, RaceResult
+from apps.membership.rest_api.filters import EventFilter, RaceFilter, RaceResultFilter
+from apps.membership.rest_api.serializers import (
+    SessionSerializer, UserSessionSerializer, UserProfileSerializer, SetPasswordSerializer, EventSerializer,
+    RaceSerializer, RaceResultSerializer
+)
 from race_membership.helpers.utils import ExtendedOrderingFilterBackend, CustomLoggingMixin as LoggingMixin
 
 
@@ -145,10 +148,11 @@ class ProfileView(LoggingMixin, viewsets.ViewSet):
         return Response(self.serializer_class(request.user, context={'request': request}).data)
 
     def put(self, request, *args, **kwargs):
-        serializer = self.serializer_class(instance=request.user, data=request.data, partial=True)
+        serializer = self.serializer_class(instance=request.user, data=request.data, partial=True,
+                                           context={'request': request})
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        return Response(self.serializer_class(user, context={'request': request}).data)
+        serializer.save()
+        return Response(serializer.data)
 
     @action(detail=False, methods=['PUT'])
     def password(self, request, *args, **kwargs):
@@ -164,6 +168,7 @@ class ProfileView(LoggingMixin, viewsets.ViewSet):
 
 class EventView(LoggingMixin, HistoricalViewMixin, viewsets.ModelViewSet):
     queryset = Event.objects.all()
+    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     serializer_class = EventSerializer
     filterset_class = EventFilter
     max_page_size = 0
@@ -171,19 +176,24 @@ class EventView(LoggingMixin, HistoricalViewMixin, viewsets.ModelViewSet):
     ordering_fields = '__all__'
     search_fields = ['name', 'promotor__name', 'location']
 
-    def check_permissions(self, request):
-        if self.action in ('list', 'retrieve'):  # make event-list and event-retrieve as public
-            return
-        return super().check_permissions(request)
+
+class RaceView(LoggingMixin, HistoricalViewMixin, viewsets.ModelViewSet):
+    queryset = Race.objects.all()
+    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
+    serializer_class = RaceSerializer
+    filterset_class = RaceFilter
+    max_page_size = 500
+    ordering = 'id'
+    ordering_fields = '__all__'
+    search_fields = ['name', 'category__name']
 
 
-class RaceResultView(LoggingMixin, viewsets.ModelViewSet):
+class RaceResultView(LoggingMixin, HistoricalViewMixin, viewsets.ModelViewSet):
     queryset = RaceResult.objects.all()
+    permission_classes = (DjangoModelPermissionsOrAnonReadOnly,)
     serializer_class = RaceResultSerializer
-    max_page_size = 0
-    search_fields = ['race__id']
-
-    def check_permissions(self, request):
-        if self.action in ('list', 'retrieve'):  # make event-list and event-retrieve as public
-            return
-        return super().check_permissions(request)
+    filterset_class = RaceResultFilter
+    max_page_size = 1000
+    ordering = 'id'
+    ordering_fields = '__all__'
+    search_fields = ['race__name', 'racer__first_name', 'racer__last_name']
