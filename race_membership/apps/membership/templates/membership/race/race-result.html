@@ -61,6 +61,10 @@
       $('#races').on('change', function () {
           const optionSelected = $("option:selected", this);
           const valueSelected = optionSelected[0].value;
+          // If select the first option
+          if (valueSelected === -1) {
+              return;
+          }
           getRaceResults(valueSelected)
               .done(function (data) {
                   if ($.fn.dataTable.isDataTable('#race_result_table')) {
@@ -70,7 +74,11 @@
                       data: data.results,
                       columns: [
                           {data: 'place'},
-                          {data: 'full_name'},
+                          {
+                              data: '_racer', render: function (data, type, row) {
+                                  return data.first_name + ' ' + data.last_name
+                              }
+                          },
                           {data: 'duration'},
                       ]
                   });
