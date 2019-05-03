@@ -157,17 +157,17 @@
               if (index >= start && index < end) {
                   let start_date = moment(event.start_date).format("dddd, MMMM Do YYYY");
                   let end_date = moment(event.end_date).format("dddd, MMMM Do YYYY");
+                  let raceResultUrl = getRaceResultUrl(event.id);
                   // Add event div
                   $('#event_table').append(
                       `<div
                           class='col-md-12 eventCell event-listing eventRow bottom-bordered mt-3'
-                          onClick='goToRaceResult(${event.id})'
                         >`);
                   let eventDiv = $('.eventCell:last');
                   // Add event name
                   eventDiv.append(`
                     <div class='row'>
-                      <div class='col-md-12 eventTitle'>${event.name}</div>
+                      <div class='col-md-12 eventTitle'><a href="${raceResultUrl}">${event.name}</a></div>
                     </div>`);
                   // Add event start/end date
                   eventDiv.append(`
@@ -180,7 +180,7 @@
                   // Add event location
                   eventDiv.append(`
                     <div class='row'>
-                      <div class='col-md-12 eventLocation'>${event.location}
+                      <div class='col-md-12 event-location'>${event.location}
                       </div>
                     </div>`);
                   $('.eventRow:last').append("</div>");
@@ -209,8 +209,8 @@
           });
       }
 
-      function goToRaceResult(eventId) {
-          location.href = "{% url 'membership:race-result' 1234 %}".replace(/1234/, eventId);
+      function getRaceResultUrl(eventId) {
+          return "{% url 'membership:race-result' 0 %}".replace(/0/, eventId);
       }
 
       $(document).ready(
