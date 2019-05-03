@@ -54,7 +54,7 @@
   <script type="application/javascript">
 
       function getRaceResults(raceId) {
-          let raceResultUrl = "{% url 'membership_rest_api:raceresult-list' 'v1' %}" + `?search=${raceId}`;
+          let raceResultUrl = "{% url 'membership_rest_api:raceresult-list' 'v1' %}" + `?race=${raceId}`;
           return $.get(raceResultUrl);
       }
 
