@@ -191,6 +191,12 @@ class RaceResultSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerial
     _racer = NestedRacerSerializer(read_only=True, source='racer')
     _race = NestedRaceSerializer(read_only=True, source='race')
 
+    full_name = serializers.SerializerMethodField()
+
+    @staticmethod
+    def get_full_name(race_result):
+        return '{} {}'.format(race_result.racer.first_name, race_result.racer.last_name)
+
     class Meta:
         model = RaceResult
         fields = '__all__'

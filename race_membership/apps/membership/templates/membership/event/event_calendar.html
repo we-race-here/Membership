@@ -61,11 +61,11 @@
                   let calendar = new FullCalendar.Calendar(calendarEl, {
                       plugins:  [ 'dayGrid', 'timeGrid', 'list'],
                       timeZone: 'UTC',
-                      defaultView: 'dayGridMonth',
+                      defaultView: 'listMonth',
                       header: {
                           left: 'prev,next today',
                           center: 'title',
-                          right: 'dayGridMonth,timeGridWeek,listWeek'
+                          right: 'dayGridMonth,timeGridWeek,listMonth'
                       },
                       titleRangeSeparator: ' - ',
                       eventLimit: true,

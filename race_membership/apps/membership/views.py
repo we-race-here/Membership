@@ -241,7 +241,7 @@ class EventCalendarView(TemplateView):
     template_name = 'membership/event/event_calendar.html'
 
 
-class EventCalendarView(View):
+class RaceResultView(View):
     template_name = 'membership/race/race-result.html'
     event_id_url_kwarg = 'event_id'
 
