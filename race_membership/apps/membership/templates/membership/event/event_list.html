@@ -79,7 +79,7 @@
 {% endblock %}
 
 {% block breadcrumb_items %}
-  <li class="breadcrumb-item active" aria-current="page">Events</li>
+  <li class="breadcrumb-item active" aria-current="page"></li><span>Events</span>
 {% endblock %}
 
 {% block content %}
@@ -112,7 +112,7 @@
             </div>
         </div>
         <div class="col-3 text-center">
-          <input type="button" class="btn btn-large btn-info" value="Search" id="search_date_btn"/>
+          <input type="button" class="btn btn-large btn-success" value="Search" id="search_date_btn"/>
         </div>
       </div>
     </div>
@@ -120,7 +120,7 @@
       <div class="container">
         <div class="row mt-3">
           <div class="col-md-12 text-right">
-            <input id="toggle_map" type="checkbox" checked data-toggle="toggle">
+            <input id="toggle_map" type="checkbox"  checked data-toggle="toggle" data-onstyle="success">
           </div>
         </div>
 
