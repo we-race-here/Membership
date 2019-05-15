@@ -74,6 +74,12 @@
       overflow-y: auto;
     }
 
+    #events_map {
+      width: 525px;
+      height: 342px;
+      background-color: grey;
+    }
+
   </style>
 
 {% endblock %}
@@ -93,7 +99,8 @@
         <div class="col-3 text-left">
           <div class="form-group">
             <div class="input-group date" id="from_date" data-target-input="nearest">
-              <input type="text" id="from_date_input" class="form-control datetimepicker-input" data-target="#from_date"/>
+              <input type="text" id="from_date_input" class="form-control datetimepicker-input"
+                     data-target="#from_date"/>
               <div class="input-group-append" data-target="#from_date" data-toggle="datetimepicker">
                 <div class="input-group-text"><i class="fa fa-calendar"></i></div>
               </div>
@@ -105,11 +112,11 @@
         </div>
         <div class="col-3 text-left">
           <div class="input-group date" id="to_date" data-target-input="nearest">
-              <input type="text"id="to_date_input"  class="form-control datetimepicker-input" data-target="#to_date"/>
-              <div class="input-group-append" data-target="#to_date" data-toggle="datetimepicker">
-                <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-              </div>
+            <input type="text" id="to_date_input" class="form-control datetimepicker-input" data-target="#to_date"/>
+            <div class="input-group-append" data-target="#to_date" data-toggle="datetimepicker">
+              <div class="input-group-text"><i class="fa fa-calendar"></i></div>
             </div>
+          </div>
         </div>
         <div class="col-3 text-center">
           <input type="button" class="btn btn-large btn-success" value="Search" id="search_date_btn"/>
@@ -120,7 +127,7 @@
       <div class="container">
         <div class="row mt-3">
           <div class="col-md-12 text-right">
-            <input id="toggle_map" type="checkbox"  checked data-toggle="toggle" data-onstyle="success">
+            <input id="toggle_map" type="checkbox" checked data-toggle="toggle" data-onstyle="success">
           </div>
         </div>
 
@@ -130,7 +137,7 @@
             <div class="row" id="event_table"></div>
           </div>
           <div class="col-md-6" id="events_map">
-            <img id="events_map" src="{% static '/dj/images/World_map_-_low_resolution.svg' %}" class="img-fluid">
+            <div id="events_map"></div>
           </div>
         </div>
         <div class="row mt-3">
@@ -146,8 +153,13 @@
   <script src="{% static 'dj/js/pagination.js' %}"></script>
   <script src="{% static 'dj/js/bootstrap4-toggle.min.js' %}"></script>
   <script src="{% static 'dj/js/tempusdominus-bootstrap-4.min.js' %}"></script>
-
+  <script async defer
+          src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBr3pEO2-pq8o_SKreYhmAezvSBt9CbKeQ&callback=initMap">
+  </script>
   <script type="text/javascript">
+      let map;
+      let mapQueue = [];
+
       function showEvents(events, page_size = 1, page_index = 1) {
           // Fill event page
           let start = page_size * (page_index - 1);
@@ -193,6 +205,20 @@
           return $.get(eventUrl, params);
       }
 
+      function init(events) {
+          initPagination(events);
+          if(map){
+              addEventsMarker(events);
+          }else{
+              mapQueue.push(function(){addEventsMarker(events)});
+          }
+      }
+
+      function addEventsMarker(events) {
+          let center = averageGeolocation(events);
+          map.panTo(center);
+      }
+
       function initPagination(events) {
           Pagination('#table_paging', {
               itemsCount: events.length,
@@ -213,6 +239,63 @@
           return "{% url 'membership:race-result' 0 %}".replace(/0/, eventId);
       }
 
+      /**
+       * Calculate the center/average of multiple GeoLocation coordinates
+       * Expects an array of objects with .latitude and .longitude properties
+       *
+       * @url http://stackoverflow.com/a/14231286/538646
+       */
+      function averageGeolocation(coords) {
+          if (coords.length === 1) {
+              return coords[0];
+          }
+
+          let x = 0.0;
+          let y = 0.0;
+          let z = 0.0;
+
+          for (let coord of coords) {
+              let latitude = coord.map_latitude * Math.PI / 180;
+              let longitude = coord.map_longitude * Math.PI / 180;
+
+              x += Math.cos(latitude) * Math.cos(longitude);
+              y += Math.cos(latitude) * Math.sin(longitude);
+              z += Math.sin(latitude);
+
+              // Add marker
+              new google.maps.Marker({position: {lat: +coord.map_latitude, lng: +coord.map_longitude}, map: map});
+          }
+
+          let total = coords.length;
+
+          x = x / total;
+          y = y / total;
+          z = z / total;
+
+          let centralLongitude = Math.atan2(y, x);
+          let centralSquareRoot = Math.sqrt(x * x + y * y);
+          let centralLatitude = Math.atan2(z, centralSquareRoot);
+
+          return {
+              lat: centralLatitude * 180 / Math.PI,
+              lng: centralLongitude * 180 / Math.PI
+          };
+      }
+
+      function initMap() {
+          // The location of US
+          const us = {lat: 37.0902, lng: -95.7129};
+          map = new google.maps.Map(
+              document.getElementById('events_map'), {zoom: 4, center: us});
+
+          if(mapQueue.length > 0){
+              for (let i = 0; i < mapQueue.length; i++) {
+                  mapQueue[i]();
+              }
+              mapQueue = [];
+          }
+      }
+
       $(document).ready(
           (function () {
               let events = [];
@@ -226,7 +309,7 @@
               getEvents({'page_size': '0'})
                   .done(function (data) {
                       events = data.results;
-                      initPagination(events);
+                      init(events);
                   });
 
               $('#toggle_map').change(function () {
@@ -265,7 +348,7 @@
                           }
                           return event.name.indexOf(searchValue) >= 0
                       });
-                      initPagination(filteredEvents);
+                      init(filteredEvents);
                   }, 500);
               });
 
@@ -276,7 +359,7 @@
                   getEvents({'start_date_min': fromDate, 'end_date_max': toDate})
                       .done(function (data) {
                           events = data.results;
-                          initPagination(events);
+                          init(events);
                       });
 
               });
