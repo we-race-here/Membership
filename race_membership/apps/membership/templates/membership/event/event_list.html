@@ -207,16 +207,17 @@
 
       function init(events) {
           initPagination(events);
-          if(map){
+          if (map) {
               addEventsMarker(events);
-          }else{
-              mapQueue.push(function(){addEventsMarker(events)});
+          } else {
+              mapQueue.push(function () {
+                  addEventsMarker(events)
+              });
           }
       }
 
       function addEventsMarker(events) {
-          let center = averageGeolocation(events);
-          map.panTo(center);
+          map.panTo(averageGeolocation(events));
       }
 
       function initPagination(events) {
@@ -255,6 +256,10 @@
           let z = 0.0;
 
           for (let coord of coords) {
+              if (!coord.map_latitude || !coord.map_longitude) {
+                  continue;
+              }
+
               let latitude = coord.map_latitude * Math.PI / 180;
               let longitude = coord.map_longitude * Math.PI / 180;
 
@@ -276,10 +281,14 @@
           let centralSquareRoot = Math.sqrt(x * x + y * y);
           let centralLatitude = Math.atan2(z, centralSquareRoot);
 
-          return {
+          let center = {
               lat: centralLatitude * 180 / Math.PI,
               lng: centralLongitude * 180 / Math.PI
           };
+          if (center.lat === 0 && center.lng === 0) {
+              center = {lat: 37.0902, lng: -95.7129};
+          }
+          return center;
       }
 
       function initMap() {
@@ -288,7 +297,7 @@
           map = new google.maps.Map(
               document.getElementById('events_map'), {zoom: 4, center: us});
 
-          if(mapQueue.length > 0){
+          if (mapQueue.length > 0) {
               for (let i = 0; i < mapQueue.length; i++) {
                   mapQueue[i]();
               }
