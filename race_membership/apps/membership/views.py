@@ -236,6 +236,11 @@ class LogoutView(View):
 class EventListView(TemplateView):
     template_name = 'membership/event/event_list.html'
 
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['google_map_api_key'] = settings.GOOGLE_MAP_API_KEY
+        return ctx
+
 
 class EventCalendarView(TemplateView):
     template_name = 'membership/event/event_calendar.html'
