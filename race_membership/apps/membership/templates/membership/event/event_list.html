@@ -157,223 +157,231 @@
           src="https://maps.googleapis.com/maps/api/js?key={{ google_map_api_key }}&callback=initMap">
   </script>
   <script type="text/javascript">
-      let map;
-      let mapQueue = [];
+    let map;
+    let mapQueue = [];
 
-      function showEvents(events, page_size = 1, page_index = 1) {
-          // Fill event page
-          let start = page_size * (page_index - 1);
-          let end = start + page_size;
-          $('#event_table').empty();
-          $(events).each(function (index, event) {
-              if (index >= start && index < end) {
-                  let start_date = moment(event.start_date).format("dddd, MMMM Do YYYY");
-                  let end_date = moment(event.end_date).format("dddd, MMMM Do YYYY");
-                  let raceResultUrl = getRaceResultUrl(event.id);
-                  // Add event div
-                  $('#event_table').append(
-                      `<div
+    function showEvents(events, page_size = 1, page_index = 1) {
+      // Fill event page
+      let start = page_size * (page_index - 1);
+      let end = start + page_size;
+      $('#event_table').empty();
+      $(events).each(function (index, event) {
+        if (index >= start && index < end) {
+          let start_date = moment(event.start_date).format("dddd, MMMM Do YYYY");
+          let end_date = moment(event.end_date).format("dddd, MMMM Do YYYY");
+          let raceResultUrl = getRaceResultUrl(event.id);
+          // Add event div
+          $('#event_table').append(
+              `<div
                           class='col-md-12 eventCell event-listing eventRow bottom-bordered mt-3'
                         >`);
-                  let eventDiv = $('.eventCell:last');
-                  // Add event name
-                  eventDiv.append(`
+          let eventDiv = $('.eventCell:last');
+          // Add event name
+          eventDiv.append(`
                     <div class='row'>
                       <div class='col-md-12 eventTitle'><a href="${raceResultUrl}">${event.name}</a></div>
                     </div>`);
-                  // Add event start/end date
-                  eventDiv.append(`
+          // Add event start/end date
+          eventDiv.append(`
                     <div class='row'>
                       <div class='col-md-12 event-date'>
                         <span id='fromDate'>${start_date}</span>&nbsp-&nbsp
                         <span id='toDate'>${end_date}</span>
                       </div>
                     </div>`);
-                  // Add event location
-                  eventDiv.append(`
+          // Add event location
+          eventDiv.append(`
                     <div class='row'>
                       <div class='col-md-12 event-location'>${event.location}
                       </div>
                     </div>`);
-                  $('.eventRow:last').append("</div>");
-              }
-          })
+          $('.eventRow:last').append("</div>");
+        }
+      })
+    }
+
+    function getEvents(params) {
+      let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
+      return $.get(eventUrl, params);
+    }
+
+    function init(events) {
+      initPagination(events);
+
+      if (map) {
+        addEventsMarker(events);
+      } else {
+        mapQueue.push(function () {
+          addEventsMarker(events)
+        });
+      }
+    }
+
+    function addEventsMarker(events) {
+      let center = averageGeolocation(events);
+      map.panTo(center);
+    }
+
+    function initPagination(events) {
+      Pagination('#table_paging', {
+        itemsCount: events.length,
+        currentPage: 1,
+        pageRange: [10, 20, 30, -1],
+        pageSize: 10,
+        onPageChange: function (paging) {
+          showEvents(events, paging.pageSize, paging.currentPage);
+        },
+        onPageSizeChange: function (paging) {
+          paging.currentPage = 1;
+          showEvents(events, paging.pageSize, paging.currentPage);
+        }
+      });
+    }
+
+    function getRaceResultUrl(eventId) {
+      return "{% url 'membership:race-result' 0 %}".replace(/0/, eventId);
+    }
+
+    /**
+     * Calculate the center/average of multiple GeoLocation coordinates
+     * Expects an array of objects with .latitude and .longitude properties
+     *
+     * @url http://stackoverflow.com/a/14231286/538646
+     */
+    function averageGeolocation(coords) {
+      if (coords.length === 0) {
+        return {lat: 37.0902, lng: -95.7129};
       }
 
-      function getEvents(params) {
-          let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
-          return $.get(eventUrl, params);
+      if (coords.length === 1) {
+        return {lat: coords[0].map_latitude || 37.0902, lng: coords[0].map_longitude || -95.7129};
       }
 
-      function init(events) {
-          initPagination(events);
-          if (map) {
-              addEventsMarker(events);
-          } else {
-              mapQueue.push(function () {
-                  addEventsMarker(events)
-              });
-          }
+      let x = 0.0;
+      let y = 0.0;
+      let z = 0.0;
+
+      for (let coord of coords) {
+        if (!coord.map_latitude || !coord.map_longitude) {
+          continue;
+        }
+
+        let latitude = coord.map_latitude * Math.PI / 180;
+        let longitude = coord.map_longitude * Math.PI / 180;
+
+        x += Math.cos(latitude) * Math.cos(longitude);
+        y += Math.cos(latitude) * Math.sin(longitude);
+        z += Math.sin(latitude);
+
+        // Add marker
+        new google.maps.Marker({position: {lat: +coord.map_latitude, lng: +coord.map_longitude}, map: map});
       }
 
-      function addEventsMarker(events) {
-          map.panTo(averageGeolocation(events));
+      let total = coords.length;
+
+      x = x / total;
+      y = y / total;
+      z = z / total;
+
+      let centralLongitude = Math.atan2(y, x);
+      let centralSquareRoot = Math.sqrt(x * x + y * y);
+      let centralLatitude = Math.atan2(z, centralSquareRoot);
+
+      let center = {
+        lat: centralLatitude * 180 / Math.PI,
+        lng: centralLongitude * 180 / Math.PI
+      };
+
+      if (center.lat === 0 && center.lng === 0) {
+        center = {lat: 37.0902, lng: -95.7129};
       }
 
-      function initPagination(events) {
-          Pagination('#table_paging', {
-              itemsCount: events.length,
-              currentPage: 1,
-              pageRange: [10, 20, 30, -1],
-              pageSize: 10,
-              onPageChange: function (paging) {
-                  showEvents(events, paging.pageSize, paging.currentPage);
-              },
-              onPageSizeChange: function (paging) {
-                  paging.currentPage = 1;
-                  showEvents(events, paging.pageSize, paging.currentPage);
-              }
+      return center;
+    }
+
+    function initMap() {
+      // The location of US
+      const us = {lat: 37.0902, lng: -95.7129};
+      map = new google.maps.Map(
+          document.getElementById('events_map'), {zoom: 4, center: us});
+
+      if (mapQueue.length > 0) {
+        for (let i = 0; i < mapQueue.length; i++) {
+          mapQueue[i]();
+        }
+        mapQueue = [];
+      }
+    }
+
+    $(document).ready(
+        (function () {
+          let events = [];
+          $('#from_date').datetimepicker({
+            format: 'YYYY-MM-DD'
           });
-      }
+          $('#to_date').datetimepicker({
+            format: 'YYYY-MM-DD'
+          });
 
-      function getRaceResultUrl(eventId) {
-          return "{% url 'membership:race-result' 0 %}".replace(/0/, eventId);
-      }
-
-      /**
-       * Calculate the center/average of multiple GeoLocation coordinates
-       * Expects an array of objects with .latitude and .longitude properties
-       *
-       * @url http://stackoverflow.com/a/14231286/538646
-       */
-      function averageGeolocation(coords) {
-          if (coords.length === 1) {
-              return coords[0];
-          }
-
-          let x = 0.0;
-          let y = 0.0;
-          let z = 0.0;
-
-          for (let coord of coords) {
-              if (!coord.map_latitude || !coord.map_longitude) {
-                  continue;
-              }
-
-              let latitude = coord.map_latitude * Math.PI / 180;
-              let longitude = coord.map_longitude * Math.PI / 180;
-
-              x += Math.cos(latitude) * Math.cos(longitude);
-              y += Math.cos(latitude) * Math.sin(longitude);
-              z += Math.sin(latitude);
-
-              // Add marker
-              new google.maps.Marker({position: {lat: +coord.map_latitude, lng: +coord.map_longitude}, map: map});
-          }
-
-          let total = coords.length;
-
-          x = x / total;
-          y = y / total;
-          z = z / total;
-
-          let centralLongitude = Math.atan2(y, x);
-          let centralSquareRoot = Math.sqrt(x * x + y * y);
-          let centralLatitude = Math.atan2(z, centralSquareRoot);
-
-          let center = {
-              lat: centralLatitude * 180 / Math.PI,
-              lng: centralLongitude * 180 / Math.PI
-          };
-          if (center.lat === 0 && center.lng === 0) {
-              center = {lat: 37.0902, lng: -95.7129};
-          }
-          return center;
-      }
-
-      function initMap() {
-          // The location of US
-          const us = {lat: 37.0902, lng: -95.7129};
-          map = new google.maps.Map(
-              document.getElementById('events_map'), {zoom: 4, center: us});
-
-          if (mapQueue.length > 0) {
-              for (let i = 0; i < mapQueue.length; i++) {
-                  mapQueue[i]();
-              }
-              mapQueue = [];
-          }
-      }
-
-      $(document).ready(
-          (function () {
-              let events = [];
-              $('#from_date').datetimepicker({
-                  format: 'YYYY-MM-DD'
-              });
-              $('#to_date').datetimepicker({
-                  format: 'YYYY-MM-DD'
+          getEvents({'page_size': '0'})
+              .done(function (data) {
+                events = data.results;
+                init(events);
               });
 
-              getEvents({'page_size': '0'})
-                  .done(function (data) {
-                      events = data.results;
-                      init(events);
-                  });
-
-              $('#toggle_map').change(function () {
-                  let mapState = ($(this).prop('checked'))
-                  let eventsContainer = $('#events_container');
-                  let eventRows = $('.eventRow');
-                  if (mapState === true) {
-                      eventsContainer.removeClass('col-md-12');
-                      eventsContainer.addClass('col-md-6');
-                      eventRows.removeClass('col-md-6');
-                      eventRows.addClass('col-md-12');
-                      $('#events_map').slideDown();
-                  } else {
-                      $('#events_map').slideUp(function () {
-                              eventsContainer.removeClass('col-md-6');
-                              eventsContainer.addClass('col-md-12');
-                              eventRows.removeClass('col-md-12');
-                              eventRows.addClass('col-md-6');
-                          }
-                      );
+          $('#toggle_map').change(function () {
+            let mapState = ($(this).prop('checked'))
+            let eventsContainer = $('#events_container');
+            let eventRows = $('.eventRow');
+            if (mapState === true) {
+              eventsContainer.removeClass('col-md-12');
+              eventsContainer.addClass('col-md-6');
+              eventRows.removeClass('col-md-6');
+              eventRows.addClass('col-md-12');
+              $('#events_map').slideDown();
+            } else {
+              $('#events_map').slideUp(function () {
+                    eventsContainer.removeClass('col-md-6');
+                    eventsContainer.addClass('col-md-12');
+                    eventRows.removeClass('col-md-12');
+                    eventRows.addClass('col-md-6');
                   }
-              });
+              );
+            }
+          });
 
-              // On Search event by name
-              let previousTimeout = undefined;
-              $("#search_input").on("keyup paste", function () {
-                  // Debounce search request
-                  if (previousTimeout) {
-                      clearTimeout(previousTimeout);
-                  }
-                  previousTimeout = setTimeout(function () {
-                      const searchValue = $("#search_input").val();
-                      let filteredEvents = events.filter(function (event) {
-                          if (!searchValue || searchValue.length === 0) {
-                              return true
-                          }
-                          return event.name.indexOf(searchValue) >= 0
-                      });
-                      init(filteredEvents);
-                  }, 500);
+          // On Search event by name
+          let previousTimeout = undefined;
+          $("#search_input").on("keyup paste", function () {
+            // Debounce search request
+            if (previousTimeout) {
+              clearTimeout(previousTimeout);
+            }
+            previousTimeout = setTimeout(function () {
+              const searchValue = $("#search_input").val();
+              let filteredEvents = events.filter(function (event) {
+                if (!searchValue || searchValue.length === 0) {
+                  return true
+                }
+                return event.name.indexOf(searchValue) >= 0
               });
+              init(filteredEvents);
+            }, 500);
+          });
 
-              // On Search event by from/to date
-              $("#search_date_btn").on("click", function () {
-                  const fromDate = $("#from_date_input").val();
-                  const toDate = $("#to_date_input").val();
-                  getEvents({'start_date_min': fromDate, 'end_date_max': toDate})
-                      .done(function (data) {
-                          events = data.results;
-                          init(events);
-                      });
+          // On Search event by from/to date
+          $("#search_date_btn").on("click", function () {
+            const fromDate = $("#from_date_input").val();
+            const toDate = $("#to_date_input").val();
+            getEvents({'start_date_min': fromDate, 'end_date_max': toDate})
+                .done(function (data) {
+                  events = data.results;
+                  init(events);
+                });
 
-              });
-          }())
-      );
+          });
+        }())
+    );
 
   </script>
 

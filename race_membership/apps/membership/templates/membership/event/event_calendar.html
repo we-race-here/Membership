@@ -46,34 +46,34 @@
 
   <script>
 
-      function getEvents(params) {
-          let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
-          return $.get(eventUrl, params);
-      }
+    function getEvents(params) {
+      let eventUrl = "{% url 'membership_rest_api:event-list' 'v1' %}";
+      return $.get(eventUrl, params);
+    }
 
-      let events = [];
-      $(document).ready(function () {
-          getEvents({'page_size': '0'})
-              .done(function (data) {
-                  $(data.results).each(function (index, event) {
-                      events.push({"title": (event.name), "start": (event.start_date), "end": (event.end_date)});
-                  });
-                  let calendar = new FullCalendar.Calendar(calendarEl, {
-                      plugins:  [ 'dayGrid', 'timeGrid', 'list'],
-                      timeZone: 'UTC',
-                      defaultView: 'listMonth',
-                      header: {
-                          left: 'prev,next today',
-                          center: 'title',
-                          right: 'dayGridMonth,timeGridWeek,listMonth'
-                      },
-                      titleRangeSeparator: ' - ',
-                      eventLimit: true,
-                      events: events
-                  });
-                  calendar.render();
-              });
-          let calendarEl = document.getElementById('calendar');
-      });
+    let events = [];
+    $(document).ready(function () {
+      getEvents({'page_size': '0'})
+          .done(function (data) {
+            $(data.results).each(function (index, event) {
+              events.push({"title": (event.name), "start": (event.start_date), "end": (event.end_date)});
+            });
+            let calendar = new FullCalendar.Calendar(calendarEl, {
+              plugins: ['dayGrid', 'timeGrid', 'list'],
+              timeZone: 'UTC',
+              defaultView: 'listMonth',
+              header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,listMonth'
+              },
+              titleRangeSeparator: ' - ',
+              eventLimit: true,
+              events: events
+            });
+            calendar.render();
+          });
+      let calendarEl = document.getElementById('calendar');
+    });
   </script>
 {% endblock extra_js %}
