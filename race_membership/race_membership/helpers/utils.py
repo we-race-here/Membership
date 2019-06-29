@@ -537,7 +537,7 @@ class ExplicitPermissions(BasePermission):
 
 def capitalize_first(s):
     if s:
-        return s[0].upper() + s[1:]
+        return s[0].upper() + s[1:].lower()
     return s
 
 
