@@ -8,7 +8,7 @@ def forwards_func(apps, schema_editor):
 
     db_alias = schema_editor.connection.alias
     Racer = apps.get_model("membership", "Racer")
-    for o in Racer.objects.using(db_alias).filter(user__isnull=False).all():
+    for o in Racer.objects.using(db_alias).all():
         o.first_name = capitalize_name(o.first_name)
         o.last_name = capitalize_name(o.last_name)
         o.save(update_fields=['first_name', 'last_name'])
