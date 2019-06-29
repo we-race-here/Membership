@@ -108,12 +108,18 @@ class Racer(models.Model):
         return uid
 
     def save(self, *args, **kwargs):
+        from race_membership.helpers.utils import capitalize_name
+
         if not self.uid:
             self.uid = self.make_uid_auto()
         if not self.first_name:
             self.first_name = self.user and self.user.first_name
         if not self.last_name:
             self.last_name = self.user and self.user.last_name
+        if self.first_name:
+            self.first_name = capitalize_name(self.first_name)
+        if self.last_name:
+            self.last_name = capitalize_name(self.last_name)
         return super().save(*args, **kwargs)
 
     def __str__(self):

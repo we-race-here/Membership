@@ -541,6 +541,12 @@ def capitalize_first(s):
     return s
 
 
+def capitalize_name(s):
+    if s:
+        return ' '.join([capitalize_first(i) for i in s.split(' ') if i])
+    return s
+
+
 def netref_to_native(d):
     if isinstance(d, dict):
         return {k: netref_to_native(v) for k, v in d.items()}
