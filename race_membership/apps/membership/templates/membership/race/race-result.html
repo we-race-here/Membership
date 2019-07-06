@@ -5,7 +5,34 @@
 {% load static %}
 
 {% block extra_css %}
-  <link href="{% static 'dj/css/datatables.min.css' %}" rel="stylesheet">
+  <link href="{% static 'dj/css/bootstrap-select.min.css' %}" rel="stylesheet">
+  <style>
+  .table thead.race-header tr {
+    font-weight: bold;
+    background-color: #f8f9fa;
+    cursor: pointer;
+    -webkit-user-select: none;
+    /* Chrome all / Safari all */
+    -moz-user-select: none;
+    /* Firefox all */
+    -ms-user-select: none;
+    /* IE 10+ */
+    user-select: none;
+    /* Likely future */
+  }
+
+  .race-header tr.active .fa.expand-icon:before {
+    content: "\f068";
+  }
+
+  .badge-custom {
+    background-color: white;
+    font-weight: 400;
+    color: #212529;
+    font-size: 1rem;
+  }
+
+  </style>
 {% endblock %}
 
 {% block breadcrumb_items %}
@@ -16,74 +43,119 @@
 {% block content %}
   <div class="card">
     <div class="card-header">
-      <h4 class="mb-0">Race result of {{ event.name }} event</h4>
+      <h4 class="mb-0">Race result of <span class="text-danger">"{{ event.name }}"</span> event</h4>
       <div class="row mt-3">
-        <div class="col-md-1">
-          <span>Races : </span>
-        </div>
-        <div class="col-md-4">
-          <select class="form-control" id="races">
-            <option value="-1">Select a race...</option>
+        <div class="col-md-12">
+          <select class="form-control selectpicker" id="races" multiple data-style="btn-info"
+                  data-none-selected-text="Filter Races" data-live-search="true" data-size="8"
+                  data-selected-text-format="count>4" data-count-selected-text="{0} races selected"
+                  data-multiple-separator=" "
+                  data-actions-box="true">
             {% for race in races %}
-              <option value="{{ race.id }}">{{ race.name }}</option>
+              <option value="{{ race.id }}" data-content="<span class='badge badge-success badge-custom'>{{ race.name }}</span>">{{ race.name }}</option>
             {% endfor %}
           </select>
         </div>
       </div>
     </div>
     <div class="card-body">
-      <div class="table-responsive ml-2 mr-2">
-        <table id="race_result_table" class="table">
-          <thead class="thead-dark">
-          <tr>
-            <th>Place</th>
-            <th>Full Name</th>
-            <th>Duration</th>
+      <table class="table">
+        <thead class="thead-dark">
+        <tr class="head">
+          <th style="width: 20%">Place</th>
+          <th style="width: 40%">Full Name</th>
+          <th style="width: 40%">Duration</th>
+        </tr>
+        </thead>
+        {% for race in races %}
+          <thead class="race-header" data-race-id="{{ race.id }}">
+          <tr data-race-id="{{ race.id }}">
+            <td colspan="3">
+              <i title="Click to expand/collapse results" class="fa fa-plus text-muted expand-icon"></i>
+              {% with races_summary|getattribute:race.pk as parts_count %}
+                <span class="badge badge-pill {% if parts_count %}badge-warning{% else %}badge-secondary{% endif %}">
+                {{ parts_count|default:'0' }}
+              </span> {{ race }}
+              {% endwith %}
+            </td>
           </tr>
           </thead>
-          <tbody>
+          <tbody class="race-result-container" data-race-id="{{ race.id }}">
           </tbody>
-        </table>
-      </div>
+        {% endfor %}
+      </table>
     </div>
   </div>
 
 {% endblock content %}
 {% block extra_js %}
-  <script src="{% static 'dj/js/datatables.js' %}"></script>
+  <script src="{% static 'dj/js/popper.min.js' %}"></script>
+  <script src="{% static 'dj/js/bootstrap-select.min.js' %}"></script>
   <script type="application/javascript">
+    const LOADING_ROW = '<tr><td colspan=3 class="text-center"><i class="fas fa-spinner fa-spin"></i></td></tr>';
+    const NO_RESULT_ROW = '<tr><td colspan=3 class="text-center text-muted">[No Records Available!]</td></tr>';
+    function getRaceResults(raceId) {
+      let raceResultUrl = "{% url 'membership_rest_api:raceresult-list' 'v1' %}" + `?page_size=0&race=${raceId}`;
+      return $.get(raceResultUrl);
+    }
+    function makeResultRow(r) {
+      return `<tr data-result-id="${r.id}"><td>${r.place}</td><td>${r._racer.first_name} ${r._racer.last_name}</td><td>${r.duration}</td></tr>`;
+    }
 
-      function getRaceResults(raceId) {
-          let raceResultUrl = "{% url 'membership_rest_api:raceresult-list' 'v1' %}" + `?page_size=0&race=${raceId}`;
-          return $.get(raceResultUrl);
-      }
+    $(document).ready(function () {
+      //Fixing jQuery Click Events for the iPad
+      var ua = navigator.userAgent,
+        event = (ua.match(/iPad/i)) ? "touchstart" : "click";
+      $('.table thead.race-header tr').on(event, function () {
+        var headerRow = $(this),
+          raceId = headerRow.data('race-id'),
+          tbody = $($(this).parent().next());
+        if (!headerRow.data('result-loaded')) {
+          tbody.append(LOADING_ROW);
+          getRaceResults(raceId).done(function(response) {
+            $('tr', tbody).remove();
+            headerRow.data('result-loaded', true);
+            tbody.append(response.results.map(function (r) {
+              return makeResultRow(r);
+            }).join(" ") || NO_RESULT_ROW);
+          }).fail(function() {
+            $('tr', tbody).remove();
+            tbody.hide(function () {
+              headerRow.removeClass("active", "");
+            });
+            alert("Failed to load records!");
+          });
+        }
+        if (headerRow.hasClass("active")) {
+          tbody.hide(function () {
+            headerRow.toggleClass("active", "");
+          });
+        } else {
+          headerRow.toggleClass("active", "");
+          tbody.show();
+        }
+      });
+    });
 
-      $('#races').on('change', function () {
-          const optionSelected = $("option:selected", this);
-          const valueSelected = optionSelected[0].value;
-          // If select the first option
-          if (valueSelected === -1) {
-              return;
-          }
-          getRaceResults(valueSelected)
-              .done(function (data) {
-                  if ($.fn.dataTable.isDataTable('#race_result_table')) {
-                      $('#race_result_table').DataTable().destroy();
-                  }
-                  $('#race_result_table').DataTable({
-                      data: data.results,
-                      columns: [
-                          {data: 'place'},
-                          {
-                              data: '_racer', render: function (data, type, row) {
-                                  return data.first_name + ' ' + data.last_name
-                              }
-                          },
-                          {data: 'duration'},
-                      ]
-                  });
-              });
+    $('#races').on('changed.bs.select', function (e, clickedIndex, isSelected, previousValue) {
+      var selectedRaces = $(this).val();
+      $('thead.race-header').each(function (i, thead) {
+        var $thead = $(thead),
+          $tbody = $thead.next();
+        $tbody.hide();
+        $('tr', $thead).removeClass("active");
+        if (selectedRaces.length === 0) {
+          $thead.show();
+          return;
+        }
+        var raceId = $thead.data('race-id');
+        if (selectedRaces.indexOf(raceId.toString()) >= 0) {
+          $thead.show();
+        } else {
+          $thead.hide();
+        }
       })
 
+    });
   </script>
 {% endblock extra_js %}

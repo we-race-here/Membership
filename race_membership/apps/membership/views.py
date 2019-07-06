@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core import signing
 from django.core.mail import send_mail
+from django.db.models import Count
 from django.shortcuts import render, redirect
 
 # Create your views here.
@@ -14,7 +15,7 @@ from django.views.generic import UpdateView, TemplateView
 from apps.membership.forms import (
     LoginForm, SignUpForm, ActivationSignUpForm, ForgotPasswordForm, PasswordRecoveryForm
 )
-from apps.membership.models import User, StaffPromotor, Race, Event
+from apps.membership.models import User, StaffPromotor, Race, Event, RaceResult
 from race_membership.helpers.shortcuts import unsign
 from race_membership.helpers.utils import PermissionRequiredMixin, success_message, send_form_errors, ex_reverse, \
     error_message
@@ -256,5 +257,9 @@ class RaceResultView(View):
             return render(request, self.template_name)
         event_id = kwargs[self.event_id_url_kwarg]
         event = get_object_or_404(Event, id=event_id)
-        races = Race.objects.filter(event=event).all()
-        return render(request, self.template_name, {'event': event, 'races': races})
+        races = Race.objects.filter(event=event).order_by('start_date', 'start_time', 'name').all()
+        races_summary = {
+            r['race']: r['results'] for r in
+            RaceResult.objects.filter(race__event=event).values('race').annotate(results=Count('race'))
+        }
+        return render(request, self.template_name, {'event': event, 'races': races, 'races_summary': races_summary})

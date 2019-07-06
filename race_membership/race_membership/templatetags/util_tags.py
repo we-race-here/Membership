@@ -78,10 +78,8 @@ def getattribute(value, arg):
         return getattribute(value, arg)
     if hasattr(value, str(arg)):
         return getattr(value, arg)
-    elif isinstance(value, dict) and arg in value:
-        return value[arg]
-    elif isinstance(value, dict) and str(arg) in value:
-        return value[str(arg)]
+    elif isinstance(value, dict):
+        return value.get(arg) or value.get(str(arg))
     elif numeric_test.match(str(arg)) and len(value) > int(arg):
         return value[int(arg)]
     else:

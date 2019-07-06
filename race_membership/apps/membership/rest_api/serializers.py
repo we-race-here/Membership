@@ -180,7 +180,6 @@ class RaceSerializer(DynamicFieldsSerializerMixin, serializers.ModelSerializer):
     _event = NestedEventSerializer(read_only=True, source='event')
     _category =  NestedRaceCategorySerializer(read_only=True, source='category')
     _types =  NestedRaceTypeSerializer(read_only=True, source='types', many=True)
-    duration_seconds = serializers.IntegerField()
 
     class Meta:
         model = Race
