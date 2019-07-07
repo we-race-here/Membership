@@ -19,7 +19,7 @@
     </div>
 
     <h3 class="kt-header__title kt-grid__item">
-      Race Membership
+      WRH-Events
     </h3>
 
     <button class="kt-header-menu-wrapper-close" id="kt_header_menu_mobile_close_btn"><i class="la la-close"></i></button>
