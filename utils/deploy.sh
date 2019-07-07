@@ -5,13 +5,13 @@ if [ -n "$1" ]; then
     BRANCH=$1
 fi
 
-NAME="race_membership"
-GITURL=https://github.com/we-race-here/Membership.git
+NAME="wrh_events"
+GITURL=https://github.com/we-race-here/wrh-events.git
 ROOTDIR=/opt/webapps
 PROJECTDIR=${ROOTDIR}/${NAME}
 DJANGODIR=${PROJECTDIR}/${NAME}
 ENVDIR=${PROJECTDIR}/env
-DJANGO_SETTINGS_MODULE=race_membership.settings.main
+DJANGO_SETTINGS_MODULE=wrh_events.settings.main
 
 echo "+++ Deploying $NAME: BRANCH=$BRANCH PROJECTDIR=$PROJECTDIR ..."
 
@@ -39,7 +39,7 @@ source ${ENVDIR}/bin/activate
 cd ${DJANGODIR}
 pip install -r requirements.txt
 pip install django-gunicorn
-cd ${DJANGODIR}/race_membership
+cd ${DJANGODIR}/wrh_events
 python manage.py migrate --settings=${DJANGO_SETTINGS_MODULE} --noinput
 python manage.py collectstatic --settings=${DJANGO_SETTINGS_MODULE} --noinput
 sudo supervisorctl start ${NAME}

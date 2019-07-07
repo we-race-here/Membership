@@ -22,13 +22,13 @@ sudo pip install gunicorn
 sudo pip install virtualenv
 
 # setup project
-NAME="race_membership"
-GITURL=https://github.com/we-race-here/Membership.git
+NAME="wrh_events"
+GITURL=https://github.com/we-race-here/wrh-events.git
 ROOTDIR=/opt/webapps
 PROJECTDIR=${ROOTDIR}/${NAME}
 DJANGODIR=${PROJECTDIR}/${NAME}
 ENVDIR=${PROJECTDIR}/env
-DJANGO_SETTINGS_MODULE=race_membership.settings.main
+DJANGO_SETTINGS_MODULE=wrh_events.settings.main
 USER=appuser                                      # the user to run as
 GROUP=appuser                                     # the group to run as
 
@@ -50,7 +50,7 @@ if [ -d "$DJANGODIR" ]; then
 else
     git clone --recursive ${GITURL} -b ${BRANCH} ${DJANGODIR}
 fi
-cp ${DJANGODIR}/race_membership/race_membership/settings/external_config_sample.py ${PROJECTDIR}/etc/external_config.py
+cp ${DJANGODIR}/wrh_events/wrh_events/settings/external_config_sample.py ${PROJECTDIR}/etc/external_config.py
 
 virtualenv -p python3 ${ENVDIR}
 source ${ENVDIR}/bin/activate
@@ -66,7 +66,7 @@ chmod +x ${ENVDIR}/bin/gunicorn_start.sh
 cd ${DJANGODIR}
 pip install -r requirements.txt
 pip install django-gunicorn
-cd ${DJANGODIR}/race_membership
+cd ${DJANGODIR}/wrh_events
 python manage.py migrate --settings=${DJANGO_SETTINGS_MODULE} --noinput
 python manage.py collectstatic --settings=${DJANGO_SETTINGS_MODULE} --noinput
 sudo service supervisor restart

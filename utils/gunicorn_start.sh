@@ -1,6 +1,6 @@
 #!/bin/bash
 
-NAME="race_membership"                                  # Name of the application
+NAME="wrh_events"                                  # Name of the application
 ROOTDIR=/opt/webapps
 PROJECTDIR=${ROOTDIR}/${NAME}
 DJANGODIR=${PROJECTDIR}/${NAME}
@@ -9,15 +9,15 @@ SOCKFILE=${PROJECTDIR}/run/${NAME}.sock
 USER=appuser                                        # the user to run as
 GROUP=appuser                                     # the group to run as
 NUM_WORKERS=3                                    # how many worker processes should Gunicorn spawn
-DJANGO_SETTINGS_MODULE=race_membership.settings.main             # which settings file should Django use
-DJANGO_WSGI_MODULE=race_membership.wsgi                     # WSGI module name
+DJANGO_SETTINGS_MODULE=wrh_events.settings.main             # which settings file should Django use
+DJANGO_WSGI_MODULE=wrh_events.wsgi                     # WSGI module name
 
 echo "Starting $NAME as `whoami`"
 
 # Activate the virtual environment
 source ${ENVDIR}/bin/activate
 export DJANGO_SETTINGS_MODULE=${DJANGO_SETTINGS_MODULE}
-export PYTHONPATH=${DJANGODIR}/race_membership:${PYTHONPATH}
+export PYTHONPATH=${DJANGODIR}/wrh_events:${PYTHONPATH}
 
 # Create the run directory if it doesn't exist
 RUNDIR=$(dirname ${SOCKFILE})
