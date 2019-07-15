@@ -1,10 +1,16 @@
 <style scoped>
   .kt-subheader {
-    background-color: #f9f9fc;
-    padding: 0;
-    padding-bottom: 20px;
+    margin-left: -25px;
+    margin-right: -25px;
+    background-color: #fff;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    padding-left: 25px;
+    margin-top: 2px;
+    margin-bottom: 15px;
   }
 </style>
+
 <template>
   <div class="kt-subheader kt-grid__item" id="kt_subheader">
     <div class="kt-subheader__main">
@@ -13,6 +19,7 @@
         <h3 class="kt-subheader__title">
           {{$route.meta.pageInfo.title}}
         </h3>
+        <span class="kt-subheader__separator kt-subheader__separator--v"></span>
       </slot>
       <slot name="post-title"></slot>
       <slot name="breadcrumb">
