@@ -1,11 +1,18 @@
 from django import forms
 from django.contrib import admin
 
-from .models import User, StaffPromotor, Racer, Promotor, RaceCategory, RaceType, Race, RaceResult, Event, License, RacerLicense
+from .models import User, StaffPromotor, Racer, Promotor, RaceCategory, RaceType, Race, RaceResult, Event, License, \
+    RacerLicense
 
 
 class RaceResultInline(admin.TabularInline):
+    ordering = ("place",)
     model = RaceResult
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "racer":
+            kwargs["queryset"] = Racer.objects.order_by('first_name', 'last_name')
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class BulkRaceForm(forms.ModelForm):
@@ -16,9 +23,6 @@ class BulkRaceAdmin(admin.ModelAdmin):
     inlines = [
         RaceResultInline,
     ]
-
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
 
 
 admin.site.register(User)
@@ -32,4 +36,3 @@ admin.site.register(RaceResult)
 admin.site.register(Event)
 admin.site.register(License)
 admin.site.register(RacerLicense)
-

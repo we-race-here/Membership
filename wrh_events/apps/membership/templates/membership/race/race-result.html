@@ -95,8 +95,8 @@
     const LOADING_ROW = '<tr><td colspan=3 class="text-center"><i class="fas fa-spinner fa-spin"></i></td></tr>';
     const NO_RESULT_ROW = '<tr><td colspan=3 class="text-center text-muted">[No Records Available!]</td></tr>';
     function getRaceResults(raceId) {
-      let raceResultUrl = "{% url 'membership_rest_api:raceresult-list' 'v1' %}" + `?page_size=0&race=${raceId}`;
-      return $.get(raceResultUrl);
+      let raceResultUrl = "{% url 'membership_rest_api:raceresult-list' 'v1' %}";
+      return $.get(raceResultUrl, {page_size: 0, race: raceId, order_by: "place"});
     }
     function makeResultRow(r) {
       return `<tr data-result-id="${r.id}"><td>${r.place}</td><td>${r._racer.first_name} ${r._racer.last_name}</td><td>${r.duration}</td></tr>`;
